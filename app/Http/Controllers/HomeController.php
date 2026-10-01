@@ -15,7 +15,7 @@ class HomeController extends Controller
     public function index(Request $request): View
     {
         $query = Listing::query()
-            ->with(['category', 'user'])
+            ->with(['category', 'user', 'photos'])
             ->where('status', 'active');
 
         // 1. Keyword search (Title OR Description)
@@ -54,6 +54,9 @@ class HomeController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('welcome', compact('listings', 'categories'));
+        // Fetch distinct active locations for the dropdown
+        $locations = Listing::where('status', 'active')->distinct()->pluck('location')->filter();
+
+        return view('welcome', compact('listings', 'categories', 'locations'));
     }
 }

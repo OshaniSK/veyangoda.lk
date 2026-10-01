@@ -47,6 +47,11 @@ class Listing extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function photos(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Photo::class)->orderBy('order', 'asc');
+    }
+
     public function contactRequests(): HasMany
     {
         return $this->hasMany(ContactRequest::class);
@@ -80,7 +85,7 @@ class Listing extends Model
     {
         return Attribute::make(
             get: function () {
-                $imagePath = $this->image_path ?: $this->images->first()?->image_path;
+                $imagePath = $this->image_path ?: $this->photos->first()?->photo_path ?: $this->images->first()?->image_path;
                 if (! $imagePath) {
                     return 'https://images.unsplash.com/photo-1584992236310-6edddc08acff?auto=format&fit=crop&w=600&q=80';
                 }

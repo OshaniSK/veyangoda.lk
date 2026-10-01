@@ -42,7 +42,7 @@ class ListingController extends Controller
         $listing = DB::transaction(function () use ($validated, $request) {
             $uploadedImages = $request->file('images');
             $imagePaths = array_map(
-                fn ($image) => $image->store('listings', 'public'),
+                fn ($image) => $image->store('listings/photos', 'public'),
                 $uploadedImages
             );
 
@@ -58,11 +58,10 @@ class ListingController extends Controller
                 'status' => 'active',
             ]);
 
-            foreach ($imagePaths as $sortOrder => $imagePath) {
-                $listing->images()->create([
-                    'image_path' => $imagePath,
-                    'is_primary' => $sortOrder === 0,
-                    'sort_order' => $sortOrder,
+            foreach ($imagePaths as $index => $imagePath) {
+                $listing->photos()->create([
+                    'photo_path' => $imagePath,
+                    'order' => $index,
                 ]);
             }
 
@@ -78,7 +77,7 @@ class ListingController extends Controller
      */
     public function show(Listing $listing): View
     {
-        $listing->load(['category', 'user']);
+        $listing->load(['category', 'user', 'photos']);
 
         // Increment views count
         $listing->incrementViews();

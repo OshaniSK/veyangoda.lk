@@ -13,26 +13,28 @@
             
             <!-- LEFT COLUMN: Image & Description (Span 8) -->
             <div class="lg:col-span-8 space-y-6">
-                <!-- Image Box -->
-                <div class="bg-white rounded-xl shadow-card overflow-hidden border border-gray-100 relative">
-                    <img src="{{ $listing->image_url }}" alt="{{ $listing->title }}" class="w-full h-auto max-h-[500px] object-contain bg-gray-50">
+                <!-- Image Gallery Grid -->
+                <div class="bg-white rounded-xl shadow-card overflow-hidden border border-gray-100 relative p-4 sm:p-6">
+                    @if($listing->photos->count() > 0)
+                        <div class="grid gap-3 grid-cols-1 sm:grid-cols-2 @if($listing->photos->count() > 2) md:grid-cols-3 @endif">
+                            @foreach($listing->photos as $index => $photo)
+                                <a href="{{ Storage::url($photo->photo_path) }}" target="_blank" class="block overflow-hidden rounded-lg shadow-sm border border-gray-100 hover:opacity-90 transition-opacity @if($index === 0 && $listing->photos->count() % 2 !== 0 && $listing->photos->count() !== 3) sm:col-span-2 md:col-span-1 @endif @if($index === 0 && $listing->photos->count() === 3) sm:col-span-2 md:col-span-2 @endif">
+                                    <img src="{{ Storage::url($photo->photo_path) }}" alt="{{ $listing->title }} - Photo" loading="lazy" class="w-full aspect-square object-cover">
+                                </a>
+                            @endforeach
+                        </div>
+                    @else
+                        <img src="{{ $listing->image_url }}" alt="{{ $listing->title }}" loading="lazy" class="w-full h-auto max-h-[500px] object-contain bg-gray-50 rounded-lg">
+                    @endif
                     
                     @if(strtolower($listing->status) !== 'active')
-                        <div class="absolute top-4 left-4">
+                        <div class="absolute top-4 left-4 z-10">
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase bg-red-100 text-red-800 border border-red-200 shadow-sm">
                                 {{ $listing->status }}
                             </span>
                         </div>
                     @endif
                 </div>
-
-                @if($listing->images->count() > 1)
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        @foreach($listing->images->skip(1) as $image)
-                            <img src="{{ $image->url }}" alt="{{ $listing->title }}" loading="lazy" class="w-full aspect-square rounded-lg object-cover border border-gray-100">
-                        @endforeach
-                    </div>
-                @endif
 
                 <!-- Description Box -->
                 <div class="bg-white rounded-xl shadow-card border border-gray-100 p-6">
