@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? 'Admin Panel' }} - CraftNest</title>
+    <title>{{ $title ?? 'Admin Panel' }} - Veyangoda.lk</title>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
@@ -21,7 +21,7 @@
     <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col shrink-0">
         <div class="h-16 flex items-center px-6 border-b border-slate-800 bg-black/20">
             <a href="{{ route('home') }}" class="font-bold text-white text-lg tracking-tight">
-                CraftNest <span class="text-brand-teal text-xs font-normal ml-1 border border-brand-teal/30 px-1.5 py-0.5 rounded">ADMIN</span>
+                Veyangoda.lk <span class="text-brand-teal text-xs font-normal ml-1 border border-brand-teal/30 px-1.5 py-0.5 rounded">ADMIN</span>
             </a>
         </div>
 
