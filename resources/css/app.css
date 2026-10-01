@@ -126,6 +126,17 @@
    UTILITY LAYER — One-off helpers
 ═══════════════════════════════════════════════════════════════ */
 @layer utilities {
+    .bg-low-poly {
+        background-color: #10B981;
+        background-image:
+            radial-gradient(ellipse at 18% 12%, rgba(52, 211, 153, 0.9), transparent 35%),
+            radial-gradient(ellipse at 82% 78%, rgba(6, 78, 59, 0.9), transparent 42%),
+            conic-gradient(from 30deg at 20% 30%, rgba(6, 78, 59, 0.32) 0deg 55deg, transparent 55deg 125deg, rgba(52, 211, 153, 0.24) 125deg 180deg, transparent 180deg 250deg, rgba(6, 78, 59, 0.2) 250deg 305deg, transparent 305deg),
+            conic-gradient(from 210deg at 78% 25%, rgba(52, 211, 153, 0.2) 0deg 60deg, transparent 60deg 130deg, rgba(6, 78, 59, 0.24) 130deg 190deg, transparent 190deg 260deg, rgba(52, 211, 153, 0.18) 260deg 320deg, transparent 320deg),
+            linear-gradient(135deg, #10B981 0%, #0A8F68 48%, #064E3B 100%);
+        background-size: auto, auto, 680px 560px, 760px 620px, auto;
+    }
+
     /* Hide scrollbar but keep scroll functionality */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

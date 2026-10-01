@@ -38,12 +38,18 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // 2. Seed Categories (Home Decor, Textiles, Food, Handicrafts)
+        // 2. Seed marketplace categories
         $categoriesData = [
             ['name' => 'Home Decor', 'slug' => 'home-decor'],
             ['name' => 'Textiles & Handloom', 'slug' => 'textiles-handloom'],
             ['name' => 'Homemade Food', 'slug' => 'homemade-food'],
             ['name' => 'Handicrafts & Art', 'slug' => 'handicrafts-art'],
+            ['name' => 'Fashion & Beauty', 'slug' => 'fashion-beauty'],
+            ['name' => 'Essentials', 'slug' => 'essentials'],
+            ['name' => 'Electronics', 'slug' => 'electronics'],
+            ['name' => 'Vehicles', 'slug' => 'vehicles'],
+            ['name' => 'Property', 'slug' => 'property'],
+            ['name' => 'Pets', 'slug' => 'pets'],
         ];
 
         $categories = [];

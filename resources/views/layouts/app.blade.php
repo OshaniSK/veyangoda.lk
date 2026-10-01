@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Veyangoda.lk') }}</title>
+        <title>Veyangoda.lk</title>
 
         <!-- Fonts: Inter -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,6 +27,10 @@
                                 primary: '#00A651',
                                 secondary: '#F3F4F6',
                                 dark: '#1F2937',
+                                'dark-green': '#064E3B',
+                                'hero-green': '#10B981',
+                                'light-green': '#34D399',
+                                'accent-yellow': '#FACC15',
                             },
                             boxShadow: {
                                 'card': '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
