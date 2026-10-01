@@ -221,66 +221,60 @@
                     @enderror
                 </div>
 
-                <!-- 5. Image Upload (Drag & Drop Zone with AlpineJS) -->
-                <div x-data="{ 
-                    photoName: null, 
-                    photoPreview: null,
-                    fileSize: null,
+                <!-- 5. Image Upload -->
+                <div x-data="{
+                    photos: [],
                     isDragging: false,
-                    clearPhoto() {
-                        this.photoName = null;
-                        this.photoPreview = null;
-                        this.fileSize = null;
-                        this.$refs.photo.value = '';
+                    updatePhotos(files) {
+                        this.photos = Array.from(files).slice(0, 5).map((file) => ({
+                            name: file.name,
+                            size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+                            preview: URL.createObjectURL(file)
+                        }));
+                    },
+                    clearPhotos() {
+                        this.photos.forEach((photo) => URL.revokeObjectURL(photo.preview));
+                        this.photos = [];
+                        this.$refs.photos.value = '';
                     }
                 }">
                     <div class="flex items-center justify-between mb-2">
                         <label class="block text-sm font-bold text-[#0F172A]">
-                            Product Photograph <span class="text-[#2563EB]">*</span>
+                            Product Photographs <span class="text-[#2563EB]">*</span>
                         </label>
-                        <span class="text-xs font-medium text-[#64748B]">JPEG, PNG, WEBP (Max 2MB)</span>
+                        <span class="text-xs font-medium text-[#64748B]">Up to 5 photos, 2MB each</span>
                     </div>
 
                     <!-- Hidden native file input -->
                     <input 
                         type="file" 
-                        id="image" 
-                        name="image" 
+                        id="images" 
+                        name="images[]" 
                         accept="image/jpeg,image/png,image/jpg,image/webp" 
+                        multiple
                         required
                         class="hidden"
-                        x-ref="photo"
-                        x-on:change="
-                            if ($refs.photo.files.length > 0) {
-                                const file = $refs.photo.files[0];
-                                photoName = file.name;
-                                fileSize = (file.size / 1024 / 1024).toFixed(2) + ' MB';
-                                const reader = new FileReader();
-                                reader.onload = (e) => {
-                                    photoPreview = e.target.result;
-                                };
-                                reader.readAsDataURL(file);
-                            }
-                        "
+                        x-ref="photos"
+                        x-on:change="updatePhotos($refs.photos.files)"
                     >
 
                     <!-- Drag & Drop Zone -->
                     <div 
-                        @click="$refs.photo.click()"
+                        @click="$refs.photos.click()"
                         @dragover.prevent="isDragging = true"
                         @dragleave.prevent="isDragging = false"
                         @drop.prevent="
                             isDragging = false;
                             if ($event.dataTransfer.files.length > 0) {
-                                $refs.photo.files = $event.dataTransfer.files;
-                                $refs.photo.dispatchEvent(new Event('change'));
+                                $refs.photos.files = $event.dataTransfer.files;
+                                updatePhotos($refs.photos.files);
                             }
                         "
                         :class="{ 'border-[#2563EB] bg-blue-50': isDragging, 'border-gray-300 hover:border-[#2563EB] bg-gray-50/50 hover:bg-gray-50': !isDragging }"
-                        class="relative cursor-pointer border-2 border-dashed rounded-xl p-8 sm:p-10 text-center transition-all group @error('image') border-red-400 bg-red-50/30 @enderror"
+                        class="relative cursor-pointer border-2 border-dashed rounded-xl p-8 sm:p-10 text-center transition-all group @error('images') border-red-400 bg-red-50/30 @enderror"
                     >
                         <!-- Empty State -->
-                        <div x-show="!photoPreview" class="space-y-4">
+                        <div x-show="photos.length === 0" class="space-y-4">
                             <div class="w-16 h-16 mx-auto rounded-full bg-blue-100 text-[#2563EB] flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
@@ -288,48 +282,38 @@
                             </div>
                             <div>
                                 <span class="text-base font-semibold text-[#0F172A] group-hover:text-[#2563EB] transition-colors block mb-1">
-                                    Upload Photos (Max 2MB)
+                                    Upload up to 5 photos
                                 </span>
-                                <p class="text-sm text-[#64748B]">Drag and drop your file here, or click to browse</p>
+                                <p class="text-sm text-[#64748B]">Drag and drop images here, or click to browse</p>
                             </div>
                         </div>
 
                         <!-- Active Preview State -->
-                        <div x-show="photoPreview" class="space-y-4" style="display: none;" @click.stop>
-                            <div class="relative inline-block group/preview">
-                                <img 
-                                    :src="photoPreview" 
-                                    alt="Preview" 
-                                    class="w-48 h-48 sm:w-56 sm:h-56 object-cover rounded-xl mx-auto shadow-md border-4 border-white"
-                                >
-                                <button 
-                                    type="button" 
-                                    @click="clearPhoto()"
-                                    class="absolute -top-3 -right-3 w-8 h-8 bg-white border border-red-100 text-red-600 rounded-full flex items-center justify-center hover:bg-red-50 hover:scale-110 shadow-lg transition-all"
-                                    title="Remove photo"
-                                >
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                </button>
+                        <div x-show="photos.length > 0" class="space-y-4" style="display: none;" @click.stop>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 text-left">
+                                <template x-for="(photo, index) in photos" :key="photo.preview">
+                                    <div class="min-w-0">
+                                        <img :src="photo.preview" :alt="'Photo ' + (index + 1)" class="w-full aspect-square object-cover rounded-lg border-2 border-white shadow">
+                                        <p class="mt-1 text-xs font-medium text-[#0F172A] truncate" x-text="photo.name"></p>
+                                        <p class="text-xs text-[#64748B]" x-text="photo.size"></p>
+                                    </div>
+                                </template>
                             </div>
-                            <div>
-                                <p class="font-semibold text-[#0F172A] truncate max-w-xs mx-auto" x-text="photoName"></p>
-                                <span class="text-sm text-[#64748B]" x-text="fileSize"></span>
+                            <div class="flex justify-center gap-4">
+                                <button type="button" @click="$refs.photos.click()" class="text-sm font-semibold text-[#2563EB] hover:underline">Change photos</button>
+                                <button type="button" @click="clearPhotos()" class="text-sm font-semibold text-red-600 hover:underline">Clear all</button>
                             </div>
-                            <button 
-                                type="button" 
-                                @click="$refs.photo.click()" 
-                                class="text-sm font-semibold text-[#2563EB] hover:underline"
-                            >
-                                Change image
-                            </button>
                         </div>
                     </div>
 
-                    @error('image')
+                    @error('images')
                         <p class="text-sm text-red-600 mt-2 font-medium flex items-center gap-1.5">
                             <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
                             <span>{{ $message }}</span>
                         </p>
+                    @enderror
+                    @error('images.*')
+                        <p class="text-sm text-red-600 mt-2 font-medium">{{ $message }}</p>
                     @enderror
                 </div>
 

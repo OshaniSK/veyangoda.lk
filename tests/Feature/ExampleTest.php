@@ -19,7 +19,7 @@ class ExampleTest extends TestCase
         $user = User::factory()->create();
         $category = Category::create(['name' => 'Home Decor', 'slug' => 'home-decor']);
         
-        Listing::create([
+        $listing = Listing::create([
             'user_id' => $user->id,
             'category_id' => $category->id,
             'title' => 'Handmade Teak Candle',
@@ -35,6 +35,7 @@ class ExampleTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Handmade Teak Candle');
+        $response->assertSee($listing->image_url, false);
     }
 
     public function test_can_search_listings_by_keyword(): void
@@ -120,15 +121,17 @@ class ExampleTest extends TestCase
         $response->assertSee('Post an Advertisement');
     }
 
-    public function test_authenticated_user_can_store_listing_with_image(): void
+    public function test_authenticated_user_can_store_listing_with_multiple_images(): void
     {
         Storage::fake('public');
 
         $user = User::factory()->create();
         $category = Category::create(['name' => 'Pottery', 'slug' => 'pottery']);
 
-        // Fake image using standard MIME bytes
-        $image = UploadedFile::fake()->create('clay_pot.jpg', 1500, 'image/jpeg'); // 1.5MB
+        $images = [
+            UploadedFile::fake()->create('clay_pot.jpg', 1500, 'image/jpeg'),
+            UploadedFile::fake()->create('clay_pot_side.png', 1200, 'image/png'),
+        ];
 
         $response = $this->actingAs($user)->post('/listings', [
             'title' => 'Handcrafted Terracotta Pot',
@@ -136,7 +139,7 @@ class ExampleTest extends TestCase
             'price' => 1800,
             'location' => 'Kandy',
             'description' => 'Earthenware clay pot fired in wood kilns with traditional motifs.',
-            'image' => $image,
+            'images' => $images,
         ]);
 
         $response->assertRedirect('/');
@@ -154,9 +157,11 @@ class ExampleTest extends TestCase
         $listing = Listing::firstWhere('title', 'Handcrafted Terracotta Pot');
         $this->assertNotNull($listing->image_path);
         Storage::disk('public')->assertExists($listing->image_path);
+        $this->assertCount(2, $listing->images);
+        Storage::disk('public')->assertExists($listing->images[1]->image_path);
     }
 
-    public function test_store_listing_fails_validation_if_image_exceeds_2mb(): void
+    public function test_store_listing_fails_validation_if_any_image_exceeds_2mb(): void
     {
         Storage::fake('public');
 
@@ -171,9 +176,9 @@ class ExampleTest extends TestCase
             'price' => 1800,
             'location' => 'Kandy',
             'description' => 'Earthenware clay pot fired in wood kilns with traditional motifs.',
-            'image' => $largeImage,
+            'images' => [UploadedFile::fake()->create('valid.jpg', 100, 'image/jpeg'), $largeImage],
         ]);
 
-        $response->assertSessionHasErrors('image');
+        $response->assertSessionHasErrors('images.1');
     }
 }

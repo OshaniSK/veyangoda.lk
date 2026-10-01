@@ -15,7 +15,7 @@
             <div class="lg:col-span-8 space-y-6">
                 <!-- Image Box -->
                 <div class="bg-white rounded-xl shadow-card overflow-hidden border border-gray-100 relative">
-                    <img src="{{ Storage::url($listing->image_path) }}" alt="{{ $listing->title }}" class="w-full h-auto max-h-[500px] object-contain bg-gray-50">
+                    <img src="{{ $listing->image_url }}" alt="{{ $listing->title }}" class="w-full h-auto max-h-[500px] object-contain bg-gray-50">
                     
                     @if(strtolower($listing->status) !== 'active')
                         <div class="absolute top-4 left-4">
@@ -25,6 +25,14 @@
                         </div>
                     @endif
                 </div>
+
+                @if($listing->images->count() > 1)
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        @foreach($listing->images->skip(1) as $image)
+                            <img src="{{ $image->url }}" alt="{{ $listing->title }}" loading="lazy" class="w-full aspect-square rounded-lg object-cover border border-gray-100">
+                        @endforeach
+                    </div>
+                @endif
 
                 <!-- Description Box -->
                 <div class="bg-white rounded-xl shadow-card border border-gray-100 p-6">

@@ -27,7 +27,8 @@ class StoreListingRequest extends FormRequest
             'price' => ['required', 'numeric', 'min:0'],
             'location' => ['required', 'string', 'max:100'],
             'description' => ['required', 'string', 'min:20', 'max:5000'],
-            'image' => ['required', 'file', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'images' => ['required', 'array', 'min:1', 'max:5'],
+            'images.*' => ['required', 'file', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ];
     }
 
@@ -48,10 +49,12 @@ class StoreListingRequest extends FormRequest
             'description.required' => 'Please write a short description or story about this product.',
             'description.min' => 'The description must be at least 20 characters long.',
             'description.max' => 'The description cannot exceed 5000 characters.',
-            'image.required' => 'Please upload a photo of your item.',
-            'image.image' => 'The uploaded file must be a valid image.',
-            'image.mimes' => 'Accepted image formats are JPEG, PNG, JPG, and WEBP.',
-            'image.max' => 'The image size cannot exceed 2MB.',
+            'images.required' => 'Please upload at least one photo of your item.',
+            'images.min' => 'Please upload at least one photo of your item.',
+            'images.max' => 'You can upload up to 5 photos.',
+            'images.*.image' => 'Each uploaded file must be a valid image.',
+            'images.*.mimes' => 'Accepted image formats are JPEG, PNG, JPG, and WEBP.',
+            'images.*.max' => 'Each image cannot exceed 2MB.',
         ];
     }
 }

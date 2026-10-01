@@ -57,6 +57,11 @@ class Listing extends Model
         return $this->hasMany(Message::class);
     }
 
+    public function images(): HasMany
+    {
+        return $this->hasMany(ListingImage::class)->orderBy('sort_order');
+    }
+
     // ── Scopes ─────────────────────────────────────────────────────────
 
     public function scopeActive(Builder $query): Builder
@@ -75,13 +80,14 @@ class Listing extends Model
     {
         return Attribute::make(
             get: function () {
-                if (! $this->image_path) {
+                $imagePath = $this->image_path ?: $this->images->first()?->image_path;
+                if (! $imagePath) {
                     return 'https://images.unsplash.com/photo-1584992236310-6edddc08acff?auto=format&fit=crop&w=600&q=80';
                 }
-                if (str_starts_with($this->image_path, 'http')) {
-                    return $this->image_path;
+                if (str_starts_with($imagePath, 'http')) {
+                    return $imagePath;
                 }
-                return Storage::url($this->image_path);
+                return Storage::url($imagePath);
             }
         );
     }

@@ -48,7 +48,7 @@
                 @foreach($listings->take(6) as $listing)
                     <a href="{{ route('listings.show', $listing->slug) }}" class="snap-start shrink-0 w-64 sm:w-72 bg-white rounded-xl shadow-card hover:shadow-card-hover overflow-hidden transition-shadow border border-gray-100 flex flex-col group">
                         <div class="aspect-[4/3] w-full bg-gray-100 overflow-hidden relative">
-                            <img src="{{ Storage::url($listing->image_path) }}" alt="{{ $listing->title }}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <img src="{{ $listing->image_url }}" alt="{{ $listing->title }}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                             @if($listing->status === 'sold')
                                 <div class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-sm uppercase tracking-wider">Sold</div>
                             @endif

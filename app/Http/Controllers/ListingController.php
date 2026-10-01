@@ -40,15 +40,13 @@ class ListingController extends Controller
         $validated = $request->validated();
 
         $listing = DB::transaction(function () use ($validated, $request) {
-            // 1. Generate unique filename: uniqid() + original extension
-            $imageFile = $request->file('image');
-            $uniqueFilename = uniqid('listing_', true) . '.' . $imageFile->getClientOriginalExtension();
+            $uploadedImages = $request->file('images');
+            $imagePaths = array_map(
+                fn ($image) => $image->store('listings', 'public'),
+                $uploadedImages
+            );
 
-            // 2. Store image in 'public/listings' disk directory
-            $imagePath = $imageFile->storeAs('listings', $uniqueFilename, 'public');
-
-            // 3. Create listing record associated with auth user
-            return Listing::create([
+            $listing = Listing::create([
                 'user_id' => auth()->id(),
                 'category_id' => $validated['category_id'],
                 'title' => $validated['title'],
@@ -56,9 +54,19 @@ class ListingController extends Controller
                 'description' => $validated['description'],
                 'price' => $validated['price'],
                 'location' => $validated['location'],
-                'image_path' => $imagePath,
+                'image_path' => $imagePaths[0],
                 'status' => 'active',
             ]);
+
+            foreach ($imagePaths as $sortOrder => $imagePath) {
+                $listing->images()->create([
+                    'image_path' => $imagePath,
+                    'is_primary' => $sortOrder === 0,
+                    'sort_order' => $sortOrder,
+                ]);
+            }
+
+            return $listing;
         });
 
         return redirect()->route('home')

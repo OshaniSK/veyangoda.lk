@@ -1,13 +1,7 @@
 @props(['listing'])
 
 @php
-    // Handle image path whether stored locally in public disk or external URL
-    $imageSrc = 'https://images.unsplash.com/photo-1584992236310-6edddc08acff?auto=format&fit=crop&w=600&q=80';
-    if (!empty($listing->image_path)) {
-        $imageSrc = str_starts_with($listing->image_path, 'http')
-            ? $listing->image_path
-            : asset('storage/' . $listing->image_path);
-    }
+    $imageSrc = $listing->image_url;
 
     // Status badge class mapping
     $statusClass = match(strtolower($listing->status ?? 'active')) {
