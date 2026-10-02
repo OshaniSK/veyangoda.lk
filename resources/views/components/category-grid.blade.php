@@ -37,7 +37,7 @@
                         'pets' => ['#9333EA', '#E9D5FF', '#F97316'],
                     ][$categoryIcon];
                 @endphp
-                <a href="{{ route('listings.index', ['category_id' => $category->id]) }}" class="group flex min-h-52 flex-col items-center justify-center rounded-xl border border-slate-100 bg-white px-5 py-6 text-center shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-950/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600">
+                <a href="{{ route('listings.index', ['category' => $category->slug]) }}" class="group flex min-h-52 cursor-pointer flex-col items-center justify-center rounded-xl border border-slate-100 bg-white px-5 py-6 text-center shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-950/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600">
                     <div class="mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-50 transition-colors group-hover:bg-emerald-50">
                         <svg aria-hidden="true" class="h-14 w-14" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
                             @switch($categoryIcon)

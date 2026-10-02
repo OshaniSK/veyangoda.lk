@@ -1,170 +1,134 @@
-<x-layouts.app>
-    {{-- Hero Section --}}
-    <section class="relative bg-gradient-to-b from-amber-50/70 via-stone-50 to-stone-50 pt-10 pb-12 sm:pt-14 sm:pb-16 border-b border-stone-200/60">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100/80 text-amber-900 text-xs font-semibold mb-4 border border-amber-200">
-                <svg class="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z" clip-rule="evenodd"/>
-                </svg>
-                <span>Support Sri Lankan Small Cottage Industries</span>
-            </div>
+<x-app-layout>
+    <main class="min-h-[70vh] bg-slate-50">
+        <div class="mx-auto max-w-7xl px-4 pb-12 pt-6 sm:px-6 sm:pt-8 lg:px-8">
+            <nav aria-label="Breadcrumb" class="mb-4 text-sm">
+                <ol class="flex flex-wrap items-center gap-2 text-slate-500">
+                    <li><a href="{{ route('home') }}" class="font-medium text-emerald-800 hover:text-emerald-950 hover:underline">Home</a></li>
+                    <li aria-hidden="true" class="text-slate-400">/</li>
+                    <li aria-current="page" class="font-medium text-slate-700">{{ $activeCategory?->name ?? 'Browse Ads' }}</li>
+                </ol>
+            </nav>
 
-            <h1 class="text-3xl sm:text-5xl font-extrabold text-stone-900 tracking-tight font-serif max-w-3xl mx-auto leading-tight">
-                Authentic Homemade Goods, <br class="hidden sm:inline">
-                <span class="text-amber-800 underline decoration-amber-300 decoration-wavy decoration-2">Directly from the Makers.</span>
-            </h1>
+            <header class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <p class="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-emerald-800">Veyangoda.lk marketplace</p>
+                    <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">{{ $activeCategory?->name ?? ($search !== '' ? 'Search Results' : 'Browse Ads') }}</h1>
+                    <p class="mt-2 text-sm text-slate-600 sm:text-base">
+                        @if($activeCategory)
+                            Discover {{ strtolower($activeCategory->name) }} from local sellers across Sri Lanka.
+                        @elseif($search !== '')
+                            Listings matching “{{ $search }}”.
+                        @else
+                            Find homemade goods, local services, and more from sellers across Sri Lanka.
+                        @endif
+                    </p>
+                </div>
+                <a href="{{ route('listings.create') }}" class="inline-flex w-fit items-center gap-2 rounded-lg bg-[#F59E0B] px-4 py-2.5 text-sm font-bold text-green-900 shadow-sm transition hover:bg-amber-500 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 focus-visible:ring-offset-2">
+                    <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14m7-7H5"/></svg>
+                    Post an Ad
+                </a>
+            </header>
 
-            <p class="mt-4 text-sm sm:text-base text-stone-600 max-w-2xl mx-auto leading-relaxed">
-                Discover small-batch homemade candles, organic pickles, handloom textiles, and domestic crafts. Zero dealer markups.
-            </p>
-
-            {{-- Clean Search & Discovery Filter Bar --}}
-            <div class="mt-8 max-w-4xl mx-auto">
-                <form action="{{ route('home') }}" method="GET" class="bg-white p-2.5 sm:p-3 rounded-2xl shadow-xl shadow-stone-900/5 border border-stone-200 flex flex-col sm:flex-row gap-2">
-                    {{-- Keyword Input --}}
-                    <div class="relative flex-1">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                            </svg>
-                        </div>
-                        <input 
-                            type="text" 
-                            name="q" 
-                            value="{{ request('q') }}" 
-                            placeholder="What homemade item are you looking for? (e.g. Candles, Jams, Batik)"
-                            class="w-full pl-10 pr-3 py-3 text-sm bg-transparent border-0 rounded-xl focus:ring-2 focus:ring-amber-500 placeholder-stone-400 text-stone-900 font-medium"
-                        >
+            <section class="sticky top-16 z-30 mb-6 rounded-xl border border-slate-200 bg-white/95 p-3 shadow-md shadow-slate-900/5 backdrop-blur sm:top-20 sm:p-4" aria-label="Browse filters">
+                <form action="{{ route('listings.index') }}" method="GET" class="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(180px,0.65fr)_minmax(190px,0.7fr)_auto] sm:items-end">
+                    @if($activeCategory)
+                        <input type="hidden" name="category" value="{{ $activeCategory->slug }}">
+                    @endif
+                    <div>
+                        <label for="browse-search" class="mb-1.5 block text-xs font-bold text-slate-600">Keyword</label>
+                        <input id="browse-search" type="search" name="search" value="{{ $search }}" placeholder="Search listings" class="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-500 focus:border-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-700/20">
                     </div>
 
-                    <div class="hidden sm:block w-px bg-stone-200 my-1"></div>
-
-                    {{-- Location Filter --}}
-                    <div class="relative sm:w-56">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            </svg>
-                        </div>
-                        <input 
-                            type="text" 
-                            name="location" 
-                            value="{{ request('location') }}" 
-                            placeholder="City or District (e.g. Kandy)"
-                            class="w-full pl-10 pr-3 py-3 text-sm bg-transparent border-0 rounded-xl focus:ring-2 focus:ring-amber-500 placeholder-stone-400 text-stone-900 font-medium"
-                        >
+                    <div>
+                        <label for="browse-location" class="mb-1.5 block text-xs font-bold text-slate-600">Location</label>
+                        <select id="browse-location" name="location" class="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:border-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-700/20">
+                            <option value="">All locations</option>
+                            @foreach($locations as $location)
+                                <option value="{{ $location }}" @selected(request('location') === $location)>{{ $location }}</option>
+                            @endforeach
+                        </select>
                     </div>
 
-                    {{-- Search Action Button --}}
-                    <button 
-                        type="submit" 
-                        class="sm:w-auto px-6 py-3 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-sm shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"
-                    >
-                        <span>Search</span>
+                    <div>
+                        <label for="browse-sort" class="mb-1.5 block text-xs font-bold text-slate-600">Sort by</label>
+                        <select id="browse-sort" name="sort" class="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:border-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-700/20">
+                            <option value="latest" @selected($sort === 'latest')>Newest</option>
+                            <option value="price_asc" @selected($sort === 'price_asc')>Price: Low to High</option>
+                            <option value="price_desc" @selected($sort === 'price_desc')>Price: High to Low</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#1E3A29] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2">
+                        <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        Apply
                     </button>
                 </form>
-            </div>
 
-            {{-- Quick Category Filter Chips --}}
-            <div class="mt-6 flex items-center justify-center gap-2 flex-wrap">
-                <a 
-                    href="{{ route('home') }}" 
-                    class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all {{ !request('category') ? 'bg-amber-700 text-white shadow-sm' : 'bg-white text-stone-600 hover:bg-stone-100 border border-stone-200' }}"
-                >
-                    All Items
-                </a>
-                @foreach($categories as $cat)
-                    <a 
-                        href="{{ route('home', array_merge(request()->query(), ['category' => $cat->slug])) }}" 
-                        class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all inline-flex items-center gap-1.5 {{ request('category') === $cat->slug ? 'bg-amber-700 text-white shadow-sm' : 'bg-white text-stone-600 hover:bg-stone-100 border border-stone-200' }}"
-                    >
-                        <span>{{ $cat->name }}</span>
-                        <span class="text-[10px] px-1.5 py-0.2 rounded-full {{ request('category') === $cat->slug ? 'bg-amber-800 text-amber-100' : 'bg-stone-100 text-stone-500' }}">
-                            {{ $cat->listings_count }}
-                        </span>
-                    </a>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    {{-- Main Active Advertisements Feed --}}
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {{-- Toolbar: Results count & Sort dropdown --}}
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-stone-200 mb-8">
-            <div>
-                <h2 class="text-xl font-bold text-stone-900 tracking-tight">
-                    @if(request('category'))
-                        {{ ucwords(str_replace('-', ' ', request('category'))) }}
-                    @elseif(request('q'))
-                        Search results for "{{ request('q') }}"
-                    @else
-                        Active Domestic Advertisements
-                    @endif
-                </h2>
-                <p class="text-xs text-stone-500 mt-0.5">
-                    Showing {{ $listings->total() }} verified homemade products from local makers
-                </p>
-            </div>
-
-            {{-- Sort Options Form --}}
-            <form action="{{ route('home') }}" method="GET" class="flex items-center gap-2 self-end sm:self-auto">
-                @if(request('category'))
-                    <input type="hidden" name="category" value="{{ request('category') }}">
+                @if($activeCategory || $search !== '' || request()->filled('location') || ($sort !== 'latest'))
+                    <div class="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3" aria-label="Active filters">
+                        <span class="mr-1 text-xs font-semibold text-slate-500">Active filters</span>
+                        @if($activeCategory)
+                            <a href="{{ route('listings.index', request()->except(['category', 'category_id', 'page'])) }}" class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-900 hover:bg-emerald-100">
+                                {{ $activeCategory->name }} <span aria-hidden="true">×</span><span class="sr-only">Remove category filter</span>
+                            </a>
+                        @endif
+                        @if($search !== '')
+                            <a href="{{ route('listings.index', request()->except(['search', 'q', 'page'])) }}" class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-900 hover:bg-emerald-100">
+                                “{{ $search }}” <span aria-hidden="true">×</span><span class="sr-only">Remove keyword filter</span>
+                            </a>
+                        @endif
+                        @if(request()->filled('location'))
+                            <a href="{{ route('listings.index', request()->except(['location', 'page'])) }}" class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-900 hover:bg-emerald-100">
+                                {{ request('location') }} <span aria-hidden="true">×</span><span class="sr-only">Remove location filter</span>
+                            </a>
+                        @endif
+                        @if($sort !== 'latest')
+                            <a href="{{ route('listings.index', request()->except(['sort', 'page'])) }}" class="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-950 hover:bg-amber-200">
+                                {{ $sort === 'price_asc' ? 'Price: Low to High' : 'Price: High to Low' }} <span aria-hidden="true">×</span><span class="sr-only">Remove sort filter</span>
+                            </a>
+                        @endif
+                        <a href="{{ route('listings.index') }}" class="ml-auto text-xs font-semibold text-slate-500 underline decoration-slate-300 underline-offset-2 hover:text-emerald-900">Clear all</a>
+                    </div>
                 @endif
-                @if(request('q'))
-                    <input type="hidden" name="q" value="{{ request('q') }}">
-                @endif
-                @if(request('location'))
-                    <input type="hidden" name="location" value="{{ request('location') }}">
-                @endif
+            </section>
 
-                <label for="sort" class="text-xs font-semibold text-stone-500 uppercase tracking-wider shrink-0">Sort By:</label>
-                <select 
-                    id="sort" 
-                    name="sort" 
-                    onchange="this.form.submit()" 
-                    class="text-xs font-medium rounded-xl border-stone-200 bg-white py-1.5 pl-3 pr-8 text-stone-700 focus:border-amber-500 focus:ring-amber-500"
-                >
-                    <option value="latest" {{ request('sort') === 'latest' ? 'selected' : '' }}>Newest Listed</option>
-                    <option value="price_asc" {{ request('sort') === 'price_asc' ? 'selected' : '' }}>Price: Low to High</option>
-                    <option value="price_desc" {{ request('sort') === 'price_desc' ? 'selected' : '' }}>Price: High to Low</option>
-                    <option value="popular" {{ request('sort') === 'popular' ? 'selected' : '' }}>Most Viewed</option>
-                </select>
-            </form>
-        </div>
-
-        {{-- Listing Cards Grid --}}
-        @if($listings->count() > 0)
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                @foreach($listings as $listing)
-                    <x-listing-card :listing="$listing" />
-                @endforeach
-            </div>
-
-            {{-- Pagination Navigation --}}
-            <div class="mt-12">
-                {{ $listings->links() }}
-            </div>
-        @else
-            {{-- Empty State --}}
-            <div class="text-center py-16 bg-white rounded-3xl border border-stone-200 p-8">
-                <div class="w-16 h-16 mx-auto rounded-full bg-amber-50 text-amber-700 flex items-center justify-center mb-4">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
+            <section aria-label="Listing results">
+                <div class="mb-5 flex flex-wrap items-center justify-between gap-2">
+                    <p class="text-sm text-slate-600" aria-live="polite">
+                        Showing <span class="font-bold text-slate-900">{{ $listings->total() }}</span>
+                        {{ $listings->total() === 1 ? 'ad' : 'ads' }}
+                        @if($activeCategory)
+                            in <span class="font-semibold text-slate-900">{{ $activeCategory->name }}</span>
+                        @elseif($search !== '')
+                            matching <span class="font-semibold text-slate-900">“{{ $search }}”</span>
+                        @else
+                            across Veyangoda.lk
+                        @endif
+                        @if(request()->filled('location'))
+                            in <span class="font-semibold text-slate-900">{{ request('location') }}</span>
+                        @endif
+                    </p>
+                    <span class="text-xs text-slate-500">{{ $listings->firstItem() ?? 0 }}–{{ $listings->lastItem() ?? 0 }} of {{ $listings->total() }}</span>
                 </div>
-                <h3 class="text-lg font-bold text-stone-900">No homemade items match your filters</h3>
-                <p class="text-sm text-stone-500 mt-1 max-w-sm mx-auto">
-                    Try clearing your location or price criteria, or browse all categories to explore our artisan collection.
-                </p>
-                <div class="mt-6">
-                    <a href="{{ route('home') }}" class="inline-flex items-center px-4 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-semibold text-xs transition-colors">
-                        Reset All Filters
-                    </a>
-                </div>
-            </div>
-        @endif
-    </section>
-</x-layouts.app>
+
+                @if($listings->isNotEmpty())
+                    <div class="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+                        @foreach($listings as $listing)
+                            <x-listing-card :listing="$listing" />
+                        @endforeach
+                    </div>
+                    <div class="mt-8">{{ $listings->links() }}</div>
+                @else
+                    <div class="rounded-2xl border border-slate-200 bg-white px-5 py-14 text-center shadow-sm sm:px-10">
+                        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-800">
+                            <svg aria-hidden="true" class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M3 8.5 12 4l9 4.5v10L12 23l-9-4.5v-10Z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="m3.5 8.8 8.5 4.3 8.5-4.3M12 13v9.5"/></svg>
+                        </div>
+                        <h2 class="text-xl font-extrabold text-slate-900">No ads found{{ $activeCategory ? ' in ' . $activeCategory->name : '' }}.</h2>
+                        <p class="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-600">Be the first to post in this category and introduce your creation to local buyers.</p>
+                        <a href="{{ route('listings.create') }}" class="mt-6 inline-flex items-center justify-center rounded-full bg-[#F59E0B] px-6 py-3 font-bold text-green-900 shadow-sm transition hover:bg-amber-500 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 focus-visible:ring-offset-2">Be the First to Post</a>
+                    </div>
+                @endif
+            </section>
+        </div>
+    </main>
+</x-app-layout>

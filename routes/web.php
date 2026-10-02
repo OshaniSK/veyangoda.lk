@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 
 // ── Public Feed ──────────────────────────────────────────────────────────
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/listings', [HomeController::class, 'index'])->name('listings.index');
+Route::get('/listings', [ListingController::class, 'index'])->name('listings.index');
 
 // ── Contact Us ───────────────────────────────────────────────────────────
 Route::get('/contact', [App\Http\Controllers\ContactController::class, 'index'])->name('contact.index');
