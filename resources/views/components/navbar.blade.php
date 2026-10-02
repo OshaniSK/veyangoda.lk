@@ -75,17 +75,30 @@
                     </div>
                 @endguest
 
-                <!-- High Contrast Post Ad Button -->
-                <a href="{{ route('listings.create') }}" class="bg-accent-yellow text-dark-green hover:bg-yellow-500 font-bold py-2 px-6 rounded-md shadow-md transition-transform hover:scale-105 flex items-center gap-2">
-                    POST YOUR AD
-                </a>
+                @if(request()->routeIs('listings.create'))
+                    <a href="{{ route('home') }}" class="inline-flex items-center gap-2 rounded-md bg-accent-yellow px-5 py-2.5 font-bold text-dark-green shadow-md transition hover:scale-[1.02] hover:bg-yellow-400">
+                        <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19 3 12l7-7M3 12h18"/></svg>
+                        Back to Home
+                    </a>
+                @else
+                    <a href="{{ route('listings.create') }}" class="bg-accent-yellow text-dark-green hover:bg-yellow-500 font-bold py-2 px-6 rounded-md shadow-md transition-transform hover:scale-105 flex items-center gap-2">
+                        POST YOUR AD
+                    </a>
+                @endif
             </div>
 
             <!-- Mobile: Right Side (Hamburger, Post Ad) -->
             <div class="flex lg:hidden items-center gap-3">
-                <a href="{{ route('listings.create') }}" class="bg-accent-yellow text-dark-green hover:bg-yellow-500 font-bold py-1.5 px-4 rounded-md text-sm shadow-md flex items-center gap-1">
-                    Post Ad
-                </a>
+                @if(request()->routeIs('listings.create'))
+                    <a href="{{ route('home') }}" class="inline-flex items-center gap-1.5 rounded-md bg-accent-yellow px-3 py-2 text-xs font-bold text-dark-green shadow-md hover:bg-yellow-400 sm:text-sm">
+                        <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19 3 12l7-7M3 12h18"/></svg>
+                        Back to Home
+                    </a>
+                @else
+                    <a href="{{ route('listings.create') }}" class="bg-accent-yellow text-dark-green hover:bg-yellow-500 font-bold py-1.5 px-4 rounded-md text-sm shadow-md flex items-center gap-1">
+                        Post Ad
+                    </a>
+                @endif
 
                 <button @click="mobileMenuOpen = !mobileMenuOpen" class="text-white p-2 focus:outline-none">
                     <svg class="w-6 h-6" x-show="!mobileMenuOpen" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>

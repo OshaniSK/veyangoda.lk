@@ -17,7 +17,7 @@ class MessageController extends Controller
      * Show inbox: unique conversation threads for the authenticated user.
      * Route: GET /messages/inbox
      */
-    public function inbox(): View
+    public function inbox(Request $request): View
     {
         $userId = auth()->id();
 
@@ -34,11 +34,51 @@ class MessageController extends Controller
             ->map(fn ($thread) => $thread->first()) // Latest message per thread
             ->values();
 
+        $unreadPartnerIds = Message::query()
+            ->where('receiver_id', $userId)
+            ->where('read_status', false)
+            ->pluck('sender_id')
+            ->flip();
+
+        $selectedPartnerId = $request->integer('user');
+        $selectedConversation = $conversations->first(function (Message $message) use ($userId, $selectedPartnerId) {
+            $partnerId = $message->sender_id === $userId ? $message->receiver_id : $message->sender_id;
+
+            return $selectedPartnerId && $partnerId === $selectedPartnerId;
+        });
+
+        $selectedPartner = null;
+        $previewMessages = collect();
+
+        if ($selectedConversation) {
+            $selectedPartner = $selectedConversation->sender_id === $userId
+                ? $selectedConversation->receiver
+                : $selectedConversation->sender;
+
+            $previewMessages = Message::query()
+                ->where(fn ($query) => $query
+                    ->where(fn ($pair) => $pair->where('sender_id', $userId)->where('receiver_id', $selectedPartner->id))
+                    ->orWhere(fn ($pair) => $pair->where('sender_id', $selectedPartner->id)->where('receiver_id', $userId))
+                )
+                ->with('sender')
+                ->latest()
+                ->take(5)
+                ->get()
+                ->reverse()
+                ->values();
+        }
+
         $unreadCount = Message::where('receiver_id', $userId)
             ->where('read_status', false)
             ->count();
 
-        return view('messages.inbox', compact('conversations', 'unreadCount'));
+        return view('messages.index', compact(
+            'conversations',
+            'unreadCount',
+            'unreadPartnerIds',
+            'selectedPartner',
+            'previewMessages'
+        ));
     }
 
     /**

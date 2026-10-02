@@ -119,6 +119,9 @@ class ExampleTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Post an Advertisement');
+        $response->assertSee('Veyangoda.lk');
+        $response->assertSee('Back to Home');
+        $response->assertDontSee('POST YOUR AD');
     }
 
     public function test_authenticated_user_can_store_listing_with_multiple_images(): void

@@ -27,7 +27,7 @@
                                 primary: '#00A651',
                                 secondary: '#F3F4F6',
                                 dark: '#1F2937',
-                                'dark-green': '#064E3B',
+                                'dark-green': '#1E3A29',
                                 'hero-green': '#10B981',
                                 'light-green': '#34D399',
                                 'accent-yellow': '#FACC15',

@@ -23,7 +23,7 @@
                             <x-application-logo class="block h-5 w-auto fill-current text-white" />
                         </div>
                         <span class="text-white font-bold text-lg tracking-tight hidden sm:inline">
-                            {{ config('app.name', 'CraftNest') }}
+                            {{ config('app.name', 'Veyangoda.lk') }}
                         </span>
                     </a>
                 </div>

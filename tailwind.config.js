@@ -20,7 +20,7 @@ export default {
                 primary: '#00A651',     // Teal Green (Veyangoda.lk Brand Color)
                 secondary: '#F3F4F6',   // Light Gray for backgrounds
                 dark: '#1F2937',        // Dark text / Footer
-                'dark-green': '#064E3B',
+                'dark-green': '#1E3A29',
                 'hero-green': '#10B981',
                 'light-green': '#34D399',
                 'accent-yellow': '#FACC15',

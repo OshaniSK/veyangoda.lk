@@ -161,7 +161,7 @@
                 </div>
             </div>
             <div class="pt-6 text-center text-xs text-stone-500">
-                &copy; {{ date('Y') }} CraftNest Marketplace. Clean, clutter-free alternative to legacy classifieds.
+                &copy; {{ date('Y') }} Veyangoda.lk. Clean, clutter-free alternative to legacy classifieds.
             </div>
         </div>
     </footer>

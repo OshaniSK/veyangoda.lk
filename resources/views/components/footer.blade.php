@@ -6,7 +6,7 @@
             <div>
                 <h4 class="text-white text-lg font-bold mb-4">About Veyangoda.lk</h4>
                 <p class="text-sm leading-relaxed mb-4">
-                    Veyangoda.lk is your trusted local marketplace to buy and sell homemade products, crafts, and domestic goods safely and easily.
+                    Buy and sell everything from homemade food to real estate safely in Sri Lanka.
                 </p>
             </div>
 
