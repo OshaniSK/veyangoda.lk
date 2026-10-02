@@ -13,6 +13,7 @@
                 </a>
 
                 <!-- Location Dropdown (Desktop Only) -->
+                @unless(request()->routeIs('my-listings.*'))
                 <div x-data="{ open: false }" class="relative hidden lg:block">
                     <button type="button" @click="open = !open" @keydown.escape.window="open = false" class="flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-white/10 focus:outline-none">
                         <svg aria-hidden="true" class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -26,15 +27,18 @@
                         @endforeach
                     </div>
                 </div>
+                @endunless
             </div>
 
             <!-- Center: Text Links -->
+            @unless(request()->routeIs('my-listings.*'))
             <div class="hidden lg:flex flex-1 justify-center">
                 <a href="{{ route('contact.index') }}"
                    class="font-medium hover:text-gray-200 transition-colors {{ request()->routeIs('contact.*') ? 'text-white underline underline-offset-4' : '' }}">
                     Contact Us
                 </a>
             </div>
+            @endunless
 
             <!-- Right: Links & Post Ad -->
             <div class="hidden lg:flex items-center gap-6">
@@ -75,7 +79,9 @@
                     </div>
                 @endguest
 
-                @if(request()->routeIs('listings.create'))
+                @if(request()->routeIs('my-listings.*'))
+                    <span class="sr-only">My account</span>
+                @elseif(request()->routeIs('listings.create'))
                     <a href="{{ route('home') }}" class="inline-flex items-center gap-2 rounded-md bg-accent-yellow px-5 py-2.5 font-bold text-dark-green shadow-md transition hover:scale-[1.02] hover:bg-yellow-400">
                         <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19 3 12l7-7M3 12h18"/></svg>
                         Back to Home
@@ -89,7 +95,9 @@
 
             <!-- Mobile: Right Side (Hamburger, Post Ad) -->
             <div class="flex lg:hidden items-center gap-3">
-                @if(request()->routeIs('listings.create'))
+                @if(request()->routeIs('my-listings.*'))
+                    <span class="sr-only">My account</span>
+                @elseif(request()->routeIs('listings.create'))
                     <a href="{{ route('home') }}" class="inline-flex items-center gap-1.5 rounded-md bg-accent-yellow px-3 py-2 text-xs font-bold text-dark-green shadow-md hover:bg-yellow-400 sm:text-sm">
                         <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19 3 12l7-7M3 12h18"/></svg>
                         Back to Home
