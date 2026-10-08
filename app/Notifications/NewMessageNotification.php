@@ -6,8 +6,10 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use App\Channels\WebPushChannel;
+use App\Channels\FcmChannel;
 
-class NewMessageNotification extends Notification
+class NewMessageNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -23,28 +25,49 @@ class NewMessageNotification extends Notification
 
     /**
      * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
      */
     public function via(object $notifiable): array
     {
-        // Only use the database channel for this system
-        return ['database'];
+        return ['database', WebPushChannel::class, FcmChannel::class];
     }
 
     /**
      * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
      */
     public function toArray(object $notifiable): array
     {
         return [
-            'type'  => $this->data['type'] ?? 'system',
-            'title' => $this->data['title'] ?? 'New Notification',
+            'type'  => $this->data['type'] ?? 'message',
+            'title' => $this->data['title'] ?? 'New Message',
             'body'  => $this->data['body'] ?? '',
             'url'   => $this->data['url'] ?? '/',
-            'icon'  => $this->data['icon'] ?? 'bell',
+            'icon'  => $this->data['icon'] ?? 'message',
+        ];
+    }
+
+    /**
+     * Get the web push representation of the notification.
+     */
+    public function toWebPush($notifiable)
+    {
+        return [
+            'title' => $this->data['title'] ?? 'New Message',
+            'body'  => $this->data['body'] ?? '',
+            'url'   => $this->data['url'] ?? '/',
+            'icon'  => $this->data['icon'] ?? 'message',
+            'tag'   => 'chat-' . $notifiable->id, // Group by recipient
+        ];
+    }
+
+    /**
+     * Get the FCM representation of the notification.
+     */
+    public function toFcm($notifiable)
+    {
+        return [
+            'title' => $this->data['title'] ?? 'New Message',
+            'body'  => $this->data['body'] ?? '',
+            'url'   => $this->data['url'] ?? '/',
         ];
     }
 }

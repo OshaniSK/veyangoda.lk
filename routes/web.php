@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminDashboardController;
@@ -14,19 +14,19 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes — CraftNest Homemade Marketplace
+| Web Routes â€” CraftNest Homemade Marketplace
 |--------------------------------------------------------------------------
 */
 
-// ── Public Feed ──────────────────────────────────────────────────────────
+// â”€â”€ Public Feed â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/listings', [ListingController::class, 'index'])->name('listings.index');
 
-// ── Contact Us ───────────────────────────────────────────────────────────
+// â”€â”€ Contact Us â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 Route::get('/contact', [App\Http\Controllers\ContactController::class, 'index'])->name('contact.index');
 Route::post('/contact', [App\Http\Controllers\ContactController::class, 'store'])->name('contact.store');
 
-// ── Authenticated User Routes ─────────────────────────────────────────────
+// â”€â”€ Authenticated User Routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 Route::middleware(['auth'])->group(function () {
 
     // Dashboard redirect
@@ -42,7 +42,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/post-ad', [ListingController::class, 'create']);  // convenience alias
     Route::post('/listings', [ListingController::class, 'store'])->name('listings.store');
 
-    // ── My Listings ────────────────────────────────────────────────────
+    // â”€â”€ My Listings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    Route::get('/my-followed-sellers', [App\Http\Controllers\FollowController::class, 'index'])->name('followers.index');
+    Route::post('/follow/{sellerId}', [App\Http\Controllers\FollowController::class, 'toggle'])->name('follow.toggle');
+    Route::delete('/unfollow/{sellerId}', [App\Http\Controllers\FollowController::class, 'destroy'])->name('follow.destroy');
+
     Route::prefix('my-listings')->name('my-listings.')->group(function () {
         Route::get('/',              [MyListingController::class, 'index'])->name('index');
         Route::get('/{listing}/edit',[MyListingController::class, 'edit'])->name('edit');
@@ -51,27 +55,34 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/{listing}/sold', [MyListingController::class, 'markSold'])->name('sold');
     });
 
-    // ── Messages / Inbox ───────────────────────────────────────────────
+    // â”€â”€ Messages / Inbox â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     Route::prefix('messages')->name('messages.')->group(function () {
         Route::get('/inbox',     [MessageController::class, 'inbox'])->name('inbox');
         Route::get('/{user}',    [MessageController::class, 'thread'])->name('thread');
         Route::post('/',         [MessageController::class, 'store'])->name('store');
     });
 
-    // ── Contact Requests (JSON API, called from contact modal) ─────────
+    // â”€â”€ Contact Requests (JSON API, called from contact modal) â”€â”€â”€â”€â”€â”€â”€â”€â”€
     Route::post('/contact-requests', [ContactRequestController::class, 'store'])
         ->name('contact-requests.store');
         
-    // ── Notifications (Polling API) ────────────────────────────────────
+    // â”€â”€ Notifications (Polling API) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     Route::get('/api/notifications', [App\Http\Controllers\NotificationController::class, 'index']);
     Route::post('/api/notifications/{id}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead']);
     Route::post('/api/notifications/read-all', [App\Http\Controllers\NotificationController::class, 'markAllAsRead']);
 });
 
-// ── Single Listing Show (public, wildcard after specific routes) ──────────
+// â”€â”€ Seller Profile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+Route::get('/categories/{slug}', [App\Http\Controllers\CategoryController::class, 'show'])->name('categories.show');
+
+Route::get('/sellers/{slug}', [App\Http\Controllers\SellerController::class, 'show'])->name('sellers.show');
+
+// â”€â”€ Single Listing Show (public, wildcard after specific routes) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+Route::get('/listings/{category_slug}', [ListingController::class, 'category'])->name('listings.category');
+Route::get('/listings/{category_slug}/{sub_category_slug}', [ListingController::class, 'category'])->name('listings.sub_category');
 Route::get('/listings/{listing:slug}', [ListingController::class, 'show'])->name('listings.show');
 
-// ── Admin Panel ───────────────────────────────────────────────────────────
+// â”€â”€ Admin Panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/',                              [AdminDashboardController::class, 'index'])->name('dashboard');
 
@@ -98,5 +109,5 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('/contacts/{contact}',         [App\Http\Controllers\ContactController::class, 'destroy'])->name('contacts.destroy');
 });
 
-// ── Laravel Breeze Authentication Routes ──────────────────────────────────
+// â”€â”€ Laravel Breeze Authentication Routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 require __DIR__.'/auth.php';

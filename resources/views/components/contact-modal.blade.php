@@ -55,8 +55,8 @@
             window.open(this.whatsapp, '_blank', 'noopener,noreferrer');
         }
     }"
-    @open-contact-modal.window="open($event.detail)"
-    @keydown.escape.window="close()"
+    x-on:open-contact-modal.window="open($event.detail)"
+    x-on:keydown.escape.window="close()"
     x-show="isOpen"
     class="relative z-50"
     style="display: none;"

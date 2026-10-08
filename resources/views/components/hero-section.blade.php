@@ -12,34 +12,35 @@
             Buy and sell everything from homemade food to real estate safely in Sri Lanka.
         </p>
 
-        <div class="mx-auto max-w-4xl rounded-xl bg-white p-2 shadow-2xl shadow-emerald-950/20 sm:p-3">
-            <form action="{{ route('listings.index') }}" method="GET" class="flex flex-col gap-2 lg:flex-row">
-                <div class="relative flex min-w-0 flex-1 items-center">
+        <div class="mx-auto max-w-5xl overflow-visible rounded-xl bg-white p-2 shadow-2xl shadow-emerald-950/20 sm:p-3">
+            <form action="{{ route('listings.index') }}" method="GET" class="flex flex-col gap-2 overflow-visible lg:flex-row lg:items-center">
+                <div class="relative flex min-w-0 flex-1 items-center overflow-visible">
                     <svg aria-hidden="true" class="absolute left-4 h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                     <input type="text" name="search" placeholder="What are you looking for?" value="{{ request('search') }}" class="w-full rounded-lg border-0 py-3.5 pl-12 pr-4 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-emerald-500">
                 </div>
 
-                <div class="relative min-w-0 lg:w-56">
-                    <svg aria-hidden="true" class="absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    <select name="location" aria-label="Select District or City" class="w-full appearance-none rounded-lg border-0 bg-white py-3.5 pl-12 pr-10 text-slate-700 focus:ring-2 focus:ring-emerald-500">
+                <div class="relative min-w-[180px] overflow-visible lg:w-60 lg:border-l lg:border-gray-200 lg:pl-3">
+                    <svg aria-hidden="true" class="pointer-events-none absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-slate-400 lg:left-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657 13.414 20.9a2 2 0 0 1-2.828 0l-4.243-4.243a8 8 0 1 1 11.314 0ZM15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+                    <select name="location" aria-label="Select District or City" class="w-full appearance-none rounded-lg border-0 bg-white py-3.5 pl-12 pr-10 text-slate-700 focus:ring-2 focus:ring-emerald-500 lg:pl-12 lg:pr-9">
                         <option value="">Select District/City</option>
                         @foreach($locations as $location)
                             <option value="{{ $location }}" @selected(request('location') === $location)>{{ $location }}</option>
                         @endforeach
                     </select>
+                    <svg aria-hidden="true" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
                 </div>
 
-                <div class="relative min-w-0 lg:w-52">
-                    <select name="category" aria-label="Select a category" class="w-full appearance-none rounded-lg border-0 bg-white px-4 py-3.5 pr-10 text-slate-700 focus:ring-2 focus:ring-emerald-500">
+                <div class="relative min-w-[180px] overflow-visible lg:w-56 lg:border-l lg:border-gray-200 lg:pl-3">
+                    <select name="category" aria-label="Select a category" class="w-full appearance-none rounded-lg border-0 bg-white py-3.5 pl-4 pr-11 text-slate-700 focus:ring-2 focus:ring-emerald-500">
                         <option value="">All categories</option>
                         @foreach($categories as $category)
                             <option value="{{ $category->slug }}" @selected(request('category') === $category->slug)>{{ $category->name }}</option>
                         @endforeach
                     </select>
-                    <svg aria-hidden="true" class="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
+                    <svg aria-hidden="true" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
                 </div>
 
-                <button type="submit" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-accent-yellow px-7 py-3.5 font-bold text-dark-green transition-colors hover:bg-yellow-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2">
+                <button type="submit" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#F59E0B] px-7 py-3.5 font-bold text-[#1E3A29] transition-colors hover:bg-amber-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2">
                     <svg aria-hidden="true" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                     Search
                 </button>

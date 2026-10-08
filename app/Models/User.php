@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Models;
 
@@ -70,6 +70,29 @@ class User extends Authenticatable
     }
 
     // ── Relationships ──────────────────────────────────────────────────
+
+    public function deviceTokens(): HasMany
+    {
+        return $this->hasMany(DeviceToken::class);
+    }
+
+    public function routeNotificationForFcm()
+    {
+        return $this->deviceTokens()->where('platform', '!=', 'web')->pluck('token')->toArray();
+    }
+
+    public function routeNotificationForWebPush()
+    {
+        return $this->deviceTokens()->where('platform', 'web')->get()->map(function ($token) {
+            return (object) [
+                'endpoint' => $token->token,
+                'keys' => [
+                    'p256dh' => $token->p256dh_key,
+                    'auth' => $token->auth_token,
+                ],
+            ];
+        })->toArray();
+    }
 
     public function listings(): HasMany
     {

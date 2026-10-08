@@ -60,24 +60,28 @@
                 <section aria-label="Your advertisements">
                     <div class="mb-5 flex items-center justify-between">
                         <h2 class="text-lg font-bold text-slate-900 sm:text-xl">Your advertisements</h2>
-                        <span class="text-sm text-slate-500">{{ $listings->total() }} total</span>
+                        <span class="text-sm text-slate-500">{{ $listings->count() }} total</span>
                     </div>
-                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                        @foreach($listings as $listing)
-                            <article class="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-lg">
-                                <a href="{{ route('listings.show', $listing->slug) }}" class="relative block aspect-[4/3] overflow-hidden bg-slate-100">
-                                    <img src="{{ $listing->image_url }}" alt="{{ $listing->title }}" loading="lazy" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]">
-                                    <span @class([
-                                        'absolute left-3 top-3 inline-flex items-center rounded-full px-3 py-1 text-xs font-bold shadow-sm',
-                                        'bg-emerald-100 text-emerald-800' => $listing->status === 'active',
-                                        'bg-amber-100 text-amber-900' => $listing->status === 'sold',
-                                        'bg-slate-100 text-slate-700' => ! in_array($listing->status, ['active', 'sold'], true),
-                                    ])>{{ ucfirst($listing->status) }}</span>
-                                </a>
-                                <div class="p-4 sm:p-5">
-                                    <div class="flex items-start justify-between gap-3">
-                                        <div class="min-w-0">
-                                            <a href="{{ route('listings.show', $listing->slug) }}" class="line-clamp-2 font-bold leading-snug text-slate-900 hover:text-emerald-800">{{ $listing->title }}</a>
+
+                    @foreach($groupedListings as $groupName => $groupListings)
+                        <div class="mb-8">
+                            <h3 class="text-md font-bold text-slate-700 mb-4">{{ $groupName }}</h3>
+                            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                                @foreach($groupListings as $listing)
+                                    <article class="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                                        <a href="{{ route('listings.show', $listing->slug) }}" class="relative block aspect-[4/3] overflow-hidden bg-slate-100">
+                                            <img src="{{ $listing->image_url }}" alt="{{ $listing->title }}" loading="lazy" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]">
+                                            <span @class([
+                                                'absolute left-3 top-3 inline-flex items-center rounded-full px-3 py-1 text-xs font-bold shadow-sm',
+                                                'bg-emerald-100 text-emerald-800' => $listing->status === 'active',
+                                                'bg-amber-100 text-amber-900' => $listing->status === 'sold',
+                                                'bg-slate-100 text-slate-700' => ! in_array($listing->status, ['active', 'sold'], true),
+                                            ])>{{ ucfirst($listing->status) }}</span>
+                                        </a>
+                                        <div class="p-4 sm:p-5">
+                                            <div class="flex items-start justify-between gap-3">
+                                                <div class="min-w-0">
+                                                    <a href="{{ route('listings.show', $listing->slug) }}" class="line-clamp-2 font-bold leading-snug text-slate-900 hover:text-emerald-800">{{ $listing->title }}</a>
                                             <p class="mt-1 truncate text-sm text-slate-500">{{ $listing->category->name }} <span aria-hidden="true">·</span> {{ $listing->location }}</p>
                                         </div>
                                         <p class="shrink-0 text-sm font-extrabold text-emerald-900">{{ $listing->formatted_price }}</p>
@@ -103,9 +107,10 @@
                                     </div>
                                 </div>
                             </article>
-                        @endforeach
-                    </div>
-                    <div class="mt-8">{{ $listings->links() }}</div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endforeach
                 </section>
             @else
                 <section class="rounded-2xl border border-slate-100 bg-white px-6 py-14 text-center shadow-lg shadow-slate-900/5 sm:px-10 sm:py-16">

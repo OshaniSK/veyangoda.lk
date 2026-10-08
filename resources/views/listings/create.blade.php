@@ -18,7 +18,11 @@
                     <div role="alert" class="mb-6 rounded-lg border-l-4 border-red-600 bg-red-50 p-4 text-sm font-semibold text-red-800">{{ session('error') }}</div>
                 @endif
 
-                <form action="{{ route('listings.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                <form action="{{ route('listings.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6"
+                      x-data="{ 
+                          selectedCategory: '{{ old('category_id', '') }}',
+                          subCategoriesMap: @js($categories->mapWithKeys(fn($c) => [$c->id => $c->subCategories])) 
+                      }">
                     @csrf
 
                     <div x-data="{ title: @js(old('title', '')) }">
@@ -34,7 +38,7 @@
                         <div>
                             <label for="category_id" class="mb-2 block text-sm font-bold text-slate-800">Category <span class="text-red-600">*</span></label>
                             <div class="relative">
-                                <select id="category_id" name="category_id" required class="w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-3.5 pr-11 text-base text-slate-800 focus:border-green-700 focus:outline-none focus:ring-2 focus:ring-green-700/25 @error('category_id') border-red-500 @enderror">
+                                <select id="category_id" name="category_id" x-model="selectedCategory" required style="appearance:none;-webkit-appearance:none;-moz-appearance:none;background-image:none" class="w-full appearance-none bg-none rounded-lg border border-gray-300 bg-white px-4 py-3.5 pr-11 text-base text-slate-800 focus:border-green-700 focus:outline-none focus:ring-2 focus:ring-green-700/25 @error('category_id') border-red-500 @enderror">
                                     <option value="" disabled @selected(!old('category_id'))>Select a category</option>
                                     @foreach($categories as $category)
                                         <option value="{{ $category->id }}" @selected(old('category_id') == $category->id)>{{ $category->name }}</option>
@@ -44,6 +48,23 @@
                             </div>
                             @error('category_id')<p class="mt-2 text-sm font-medium text-red-600">{{ $message }}</p>@enderror
                         </div>
+
+                        <template x-if="selectedCategory && subCategoriesMap[selectedCategory] && subCategoriesMap[selectedCategory].length > 0">
+                            <div>
+                                <label for="sub_category_id" class="mb-2 block text-sm font-bold text-slate-800">Sub-Category <span class="text-red-600">*</span></label>
+                                <div class="relative">
+                                    <select id="sub_category_id" name="sub_category_id" required style="appearance:none;-webkit-appearance:none;-moz-appearance:none;background-image:none" class="w-full appearance-none bg-none rounded-lg border border-gray-300 bg-white px-4 py-3.5 pr-11 text-base text-slate-800 focus:border-green-700 focus:outline-none focus:ring-2 focus:ring-green-700/25 @error('sub_category_id') border-red-500 @enderror">
+                                        <option value="" disabled selected>Select a sub-category</option>
+                                        <template x-for="sub in subCategoriesMap[selectedCategory]" :key="sub.id">
+                                            <option :value="sub.id" x-text="sub.name"></option>
+                                        </template>
+                                    </select>
+                                    <svg aria-hidden="true" class="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
+                                </div>
+                                @error('sub_category_id')<p class="mt-2 text-sm font-medium text-red-600">{{ $message }}</p>@enderror
+                            </div>
+                        </template>
+                        
                         <div>
                             <label for="price" class="mb-2 block text-sm font-bold text-slate-800">Price (LKR) <span class="text-red-600">*</span></label>
                             <div class="relative">
