@@ -23,9 +23,17 @@ class MyListingController extends Controller
         $user = auth()->user();
 
         $listings = $user->listings()
-            ->with('category')
+            ->with(['category', 'subCategory'])
             ->latest()
-            ->paginate(10);
+            ->get();
+
+        // Group listings, replacing "Food & Flavours" with the sub-category name
+        $groupedListings = $listings->groupBy(function ($listing) {
+            if ($listing->category->slug === 'food-and-flavours' && $listing->subCategory) {
+                return $listing->subCategory->name;
+            }
+            return $listing->category->name;
+        });
 
         // Summary stats
         $stats = [
@@ -34,7 +42,7 @@ class MyListingController extends Controller
             'sold'   => $user->listings()->where('status', 'sold')->count(),
         ];
 
-        return view('listings.my-listings', compact('listings', 'stats'));
+        return view('listings.my-listings', compact('listings', 'groupedListings', 'stats'));
     }
 
     /**

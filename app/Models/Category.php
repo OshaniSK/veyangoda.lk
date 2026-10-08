@@ -14,7 +14,13 @@ class Category extends Model
         'name',
         'slug',
         'description',
+        'icon',
     ];
+
+    public function subCategories(): HasMany
+    {
+        return $this->hasMany(SubCategory::class, 'category_id');
+    }
 
     /**
      * Category hasMany Listings relationship.
@@ -22,5 +28,10 @@ class Category extends Model
     public function listings(): HasMany
     {
         return $this->hasMany(Listing::class);
+    }
+
+    public function filters(): HasMany
+    {
+        return $this->hasMany(CategoryFilter::class)->orderBy('sort_order', 'asc');
     }
 }

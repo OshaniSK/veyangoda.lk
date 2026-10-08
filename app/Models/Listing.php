@@ -17,6 +17,7 @@ class Listing extends Model
     protected $fillable = [
         'user_id',
         'category_id',
+        'sub_category_id',
         'title',
         'slug',
         'description',
@@ -25,6 +26,28 @@ class Listing extends Model
         'image_path',
         'status',
         'views_count',
+        'brand',
+        'model',
+        'condition',
+        'fuel_type',
+        'gear_type',
+        'year_min',
+        'year_max',
+        'gender',
+        'item_type',
+        'dietary',
+        'shelf_life',
+        'cuisine',
+        'meal_type',
+        'flavor',
+        'curry_type',
+        'rice_type',
+        'spice_level',
+        'temperature',
+        'size',
+        'event_type',
+        'service_type',
+        'occasion',
     ];
 
     protected function casts(): array
@@ -45,6 +68,11 @@ class Listing extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function subCategory(): BelongsTo
+    {
+        return $this->belongsTo(SubCategory::class, 'sub_category_id');
     }
 
     public function photos(): \Illuminate\Database\Eloquent\Relations\HasMany

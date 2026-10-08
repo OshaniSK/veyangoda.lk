@@ -51,11 +51,18 @@ class HomeController extends Controller
 
         // Fetch categories with active listings count for quick horizontal nav
         $categories = Category::withCount(['listings' => fn ($q) => $q->where('status', 'active')])
+            ->with('subCategories')
             ->orderBy('name')
             ->get();
 
-        // Fetch distinct active locations for the dropdown
-        $locations = Listing::where('status', 'active')->distinct()->pluck('location')->filter();
+        // Provide the 25 Sri Lankan districts in standard provincial order
+        $locations = collect([
+            'Colombo', 'Gampaha', 'Kalutara', 'Kandy', 'Matale', 'Nuwara Eliya', 
+            'Galle', 'Matara', 'Hambantota', 'Jaffna', 'Mannar', 'Vavuniya', 
+            'Mullaitivu', 'Kilinochchi', 'Batticaloa', 'Ampara', 'Trincomalee', 
+            'Kurunegala', 'Puttalam', 'Anuradhapura', 'Polonnaruwa', 'Badulla', 
+            'Monaragala', 'Rathnapura', 'Kegalle'
+        ]);
 
         return view('welcome', compact('listings', 'categories', 'locations'));
     }

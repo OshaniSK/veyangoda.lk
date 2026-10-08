@@ -24,6 +24,7 @@ class StoreListingRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:100'],
             'category_id' => ['required', 'exists:categories,id'],
+            'sub_category_id' => ['nullable', 'exists:sub_categories,id'],
             'price' => ['required', 'numeric', 'min:0'],
             'location' => ['required', 'string', 'max:100'],
             'description' => ['required', 'string', 'min:20', 'max:5000'],
