@@ -28,6 +28,12 @@ class HomeController extends Controller
         }
 
         // 2. Category filter
+        if ($request->filled('category')) {
+            $query->whereHas('category', function ($q) use ($request) {
+                $q->where('slug', $request->category);
+            });
+        }
+        
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
         }
@@ -45,11 +51,44 @@ class HomeController extends Controller
         if ($request->filled('max_price')) {
             $query->where('price', '<=', (float) $request->max_price);
         }
+        
+        // 5. Poster Type (All / Members)
+        if ($request->filled('poster_type') && $request->poster_type === 'members') {
+            $query->whereHas('user', function ($q) {
+                $q->where('is_verified_seller', true);
+            });
+        }
 
-        // Paginate active ads (12 per page)
-        $listings = $query->latest()->paginate(12)->withQueryString();
+        // 6. Sorting
+        if ($request->filled('sort')) {
+            switch ($request->sort) {
+                case 'price_asc':
+                    $query->orderBy('price', 'asc');
+                    break;
+                case 'price_desc':
+                    $query->orderBy('price', 'desc');
+                    break;
+                case 'latest':
+                default:
+                    $query->latest();
+                    break;
+            }
+        } else {
+            $query->latest();
+        }
 
-        // Fetch categories with active listings count for quick horizontal nav
+        // Paginate active ads (25 per page as requested)
+        $listings = $query->paginate(25)->withQueryString();
+
+        // Fetch featured ads
+        $featuredAds = Listing::with(['category', 'user', 'photos'])
+            ->where('status', 'active')
+            ->where('featured', true)
+            ->latest()
+            ->take(10)
+            ->get();
+
+        // Fetch categories with active listings count for sidebar
         $categories = Category::withCount(['listings' => fn ($q) => $q->where('status', 'active')])
             ->with('subCategories')
             ->orderBy('name')
@@ -64,6 +103,21 @@ class HomeController extends Controller
             'Monaragala', 'Rathnapura', 'Kegalle'
         ]);
 
-        return view('welcome', compact('listings', 'categories', 'locations'));
+        // AJAX request — return only the listings partial as JSON
+        if ($request->ajax()) {
+            $html = view('partials.home-listings', compact('listings', 'categories'))->render();
+            return response()->json([
+                'html' => $html,
+                'pagination' => [
+                    'current_page' => $listings->currentPage(),
+                    'last_page'    => $listings->lastPage(),
+                    'from'         => $listings->firstItem(),
+                    'to'           => $listings->lastItem(),
+                    'total'        => $listings->total(),
+                ],
+            ]);
+        }
+
+        return view('welcome', compact('listings', 'featuredAds', 'categories', 'locations'));
     }
 }

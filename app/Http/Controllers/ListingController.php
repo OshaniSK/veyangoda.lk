@@ -68,6 +68,26 @@ class ListingController extends Controller
             'Monaragala', 'Rathnapura', 'Kegalle'
         ]);
 
+        // AJAX — return rendered HTML partial + pagination metadata
+        if ($request->ajax()) {
+            $html = view('partials.listings-index-results', compact('listings', 'activeCategory', 'search', 'sort'))->render();
+            return response()->json([
+                'html' => $html,
+                'pagination' => [
+                    'current_page' => $listings->currentPage(),
+                    'last_page'    => $listings->lastPage(),
+                    'from'         => $listings->firstItem(),
+                    'to'           => $listings->lastItem(),
+                    'total'        => $listings->total(),
+                ],
+                'filters' => [
+                    'search'   => $search,
+                    'sort'     => $sort,
+                    'location' => $request->query('location'),
+                ],
+            ]);
+        }
+
         return view('listings.index', compact('listings', 'activeCategory', 'categories', 'locations', 'search', 'sort'));
     }
 
@@ -150,6 +170,23 @@ class ListingController extends Controller
         $listings = $query->latest()->paginate(12)->withQueryString();
 
         $filterOptions = []; // legacy empty array
+
+        // AJAX — return rendered HTML partial + pagination metadata
+        if ($request->ajax()) {
+            $html = view('partials.category-results', compact('category', 'listings'))->render();
+            return response()->json([
+                'html' => $html,
+                'pagination' => [
+                    'current_page' => $listings->currentPage(),
+                    'last_page'    => $listings->lastPage(),
+                    'from'         => $listings->firstItem(),
+                    'to'           => $listings->lastItem(),
+                    'total'        => $listings->total(),
+                ],
+                'filters' => $activeFilters,
+            ]);
+        }
+
         return view('listings.category', compact('category', 'subCategory', 'filters', 'filterOptions', 'listings', 'activeFilters'));
     }
 
