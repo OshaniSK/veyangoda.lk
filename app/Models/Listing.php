@@ -48,6 +48,13 @@ class Listing extends Model
         'event_type',
         'service_type',
         'occasion',
+        // ── Seller contact details ─────────────────────────────────────
+        'contact_name',
+        'phone_number',
+        'whatsapp_number',
+        'contact_email',
+        'show_phone',
+        'show_email',
     ];
 
     protected function casts(): array
@@ -55,8 +62,11 @@ class Listing extends Model
         return [
             'price'       => 'decimal:2',
             'views_count' => 'integer',
+            'show_phone'  => 'boolean',
+            'show_email'  => 'boolean',
         ];
     }
+
 
     // ── Relationships ──────────────────────────────────────────────────
 
@@ -129,6 +139,45 @@ class Listing extends Model
     {
         return Attribute::make(
             get: fn () => 'Rs. ' . number_format((float) $this->price, 2)
+        );
+    }
+
+    /**
+     * Formatted phone number for display: 0771234567 → 077 123 4567
+     * Works for both local (077…) and international (+94 77…) formats.
+     */
+    protected function formattedPhone(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $raw = $this->phone_number ?? '';
+                if ($raw === '') {
+                    return '';
+                }
+                // +94 prefix → strip and convert to local 0xx for formatting
+                if (str_starts_with($raw, '+94')) {
+                    $raw = '0' . ltrim(substr($raw, 3), ' ');
+                }
+                // Format: 0xx xxx xxxx (10 digits) or leave as-is
+                $digits = preg_replace('/\D/', '', $raw);
+                if (strlen($digits) === 10) {
+                    return substr($digits, 0, 3) . ' ' .
+                           substr($digits, 3, 3) . ' ' .
+                           substr($digits, 6);
+                }
+                return $this->phone_number;
+            }
+        );
+    }
+
+    /**
+     * Returns the WhatsApp number to use — falls back to phone_number when
+     * whatsapp_number has not been supplied.
+     */
+    protected function whatsappContact(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->whatsapp_number ?: $this->phone_number
         );
     }
 

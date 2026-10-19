@@ -216,16 +216,23 @@ class ListingController extends Controller
             );
 
             $listing = Listing::create([
-                'user_id' => auth()->id(),
-                'category_id' => $validated['category_id'],
+                'user_id'         => auth()->id(),
+                'category_id'     => $validated['category_id'],
                 'sub_category_id' => $validated['sub_category_id'] ?? null,
-                'title' => $validated['title'],
-                'slug' => Str::slug($validated['title']) . '-' . Str::random(6),
-                'description' => $validated['description'],
-                'price' => $validated['price'],
-                'location' => $validated['location'],
-                'image_path' => $imagePaths[0],
-                'status' => 'active',
+                'title'           => $validated['title'],
+                'slug'            => Str::slug($validated['title']) . '-' . Str::random(6),
+                'description'     => $validated['description'],
+                'price'           => $validated['price'],
+                'location'        => $validated['location'],
+                'image_path'      => $imagePaths[0],
+                'status'          => 'active',
+                // ── Seller contact details ─────────────────────────────
+                'contact_name'    => $validated['contact_name'] ?? null,
+                'phone_number'    => $validated['phone_number'],
+                'whatsapp_number' => $validated['whatsapp_number'] ?? null,
+                'contact_email'   => $validated['contact_email'] ?? null,
+                'show_phone'      => $request->boolean('show_phone', true),
+                'show_email'      => $request->boolean('show_email', false),
             ]);
 
             foreach ($imagePaths as $index => $imagePath) {

@@ -14,7 +14,10 @@ class ListingContactButtonTest extends TestCase
 
     public function test_listing_contact_button_is_an_alpine_root_that_dispatches_to_the_modal(): void
     {
-        $seller = User::factory()->create(['name' => 'Seller O\'Brien']);
+        $seller = User::factory()->create([
+            'name' => 'Seller O\'Brien',
+            'phone_number' => '0771234567',
+        ]);
         $category = Category::create(['name' => 'Home Decor', 'slug' => 'home-decor']);
         $listing = Listing::create([
             'user_id' => $seller->id,
@@ -34,6 +37,20 @@ class ListingContactButtonTest extends TestCase
             ->assertSee('x-data="{}"', false)
             ->assertSee('x-on:click="$dispatch(\'open-contact-modal\'', false)
             ->assertSee('x-on:open-contact-modal.window="open($event.detail)"', false)
+            ->assertSee('0771234567')
+            ->assertSee("window.open('https://wa.me/' + number", false)
             ->assertSee('Apostrophe Maker\'s Candle');
+    }
+
+    public function test_seller_profile_contact_button_passes_the_seller_phone_to_the_modal(): void
+    {
+        $seller = User::factory()->create([
+            'phone_number' => '0771234567',
+        ]);
+
+        $this->get(route('sellers.show', $seller->slug))
+            ->assertOk()
+            ->assertSee("phone: '0771234567'", false)
+            ->assertSee('x-on:open-contact-modal.window="open($event.detail)"', false);
     }
 }

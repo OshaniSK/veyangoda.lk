@@ -80,7 +80,7 @@
                                         </div>
                                     </template>
                                 </button>
-                                <button class="flex-1 sm:flex-none px-6 py-2.5 rounded-lg font-bold bg-[#F59E0B] text-[#1E3A29] hover:bg-amber-500 transition-colors shadow-sm focus:ring-2 focus:ring-amber-500 focus:ring-offset-2" @click="window.dispatchEvent(new CustomEvent('open-contact-modal', { detail: { sellerId: {{ $seller->id }} } }))">
+                                <button class="flex-1 sm:flex-none px-6 py-2.5 rounded-lg font-bold bg-[#F59E0B] text-[#1E3A29] hover:bg-amber-500 transition-colors shadow-sm focus:ring-2 focus:ring-amber-500 focus:ring-offset-2" @click="window.dispatchEvent(new CustomEvent('open-contact-modal', { detail: { sellerId: {{ $seller->id }}, sellerName: @js($seller->name), phone: @js($seller->phone_number ?: ($seller->phone ?: '')) } }))">
                                     Contact
                                 </button>
                             @else

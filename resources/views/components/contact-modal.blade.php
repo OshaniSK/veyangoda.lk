@@ -8,7 +8,8 @@
         sellerName: '',
         sellerId: null,
         phone: '',
-        whatsapp: '',
+        whatsappPhone: '',
+        contactEmail: '',
         revealedPhone: false,
         
         open(data) {
@@ -17,8 +18,9 @@
             this.listingPrice = data.price;
             this.sellerName = data.sellerName;
             this.sellerId = data.sellerId;
-            this.phone = data.phone;
-            this.whatsapp = data.whatsapp;
+            this.phone = data.phone || '';
+            this.whatsappPhone = data.whatsappPhone || data.phone || '';
+            this.contactEmail = data.contactEmail || '';
             this.revealedPhone = false;
             this.isOpen = true;
         },
@@ -27,7 +29,7 @@
         },
         
         async logContact(type) {
-            if (!this.isAuth) return;
+            if (!this.isAuth || !this.listingId) return;
             try {
                 await fetch('{{ route('contact-requests.store') }}', {
                     method: 'POST',
@@ -51,8 +53,13 @@
         },
         
         handleWhatsappClick() {
+            let number = (this.whatsappPhone || this.phone).replace(/\D/g, '');
+            if (number.startsWith('00')) number = number.slice(2);
+            if (number.startsWith('0')) number = '94' + number.slice(1);
+            if (!number) return;
+
             this.logContact('whatsapp');
-            window.open(this.whatsapp, '_blank', 'noopener,noreferrer');
+            window.open('https://wa.me/' + number, '_blank', 'noopener,noreferrer');
         }
     }"
     x-on:open-contact-modal.window="open($event.detail)"
@@ -140,7 +147,7 @@
                         </div>
 
                         {{-- WhatsApp Button --}}
-                        <button type="button" @click="handleWhatsappClick()" class="btn-primary w-full !bg-emerald-500 !shadow-none hover:!bg-emerald-600">
+                        <button type="button" @click="handleWhatsappClick()" :disabled="!phone" class="btn-primary w-full !bg-emerald-500 !shadow-none hover:!bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed">
                             <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.699c.97.531 1.77.82 2.802.82 3.178 0 5.767-2.587 5.767-5.766.001-3.187-2.575-5.806-5.773-5.806zm0 10.42c-.93 0-1.74-.262-2.48-.73l-.178-.106-1.57.412.42-1.53-.116-.184c-.524-.834-.8-1.545-.8-2.516 0-2.617 2.129-4.746 4.746-4.746 2.614 0 4.742 2.133 4.742 4.746 0 2.616-2.126 4.654-4.764 4.654z"/></svg>
                             <span>WhatsApp</span>
                         </button>

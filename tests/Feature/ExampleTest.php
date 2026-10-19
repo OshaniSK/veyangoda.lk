@@ -142,6 +142,8 @@ class ExampleTest extends TestCase
             'price' => 1800,
             'location' => 'Kandy',
             'description' => 'Earthenware clay pot fired in wood kilns with traditional motifs.',
+            'phone_number' => '077 123 4567',
+            'whatsapp_number' => '+94 (77) 123-4567',
             'images' => $images,
         ]);
 
@@ -154,6 +156,8 @@ class ExampleTest extends TestCase
             'title' => 'Handcrafted Terracotta Pot',
             'price' => 1800,
             'location' => 'Kandy',
+            'phone_number' => '0771234567',
+            'whatsapp_number' => '+94771234567',
             'status' => 'active',
         ]);
 
@@ -179,9 +183,13 @@ class ExampleTest extends TestCase
             'price' => 1800,
             'location' => 'Kandy',
             'description' => 'Earthenware clay pot fired in wood kilns with traditional motifs.',
+            'phone_number' => '077 123 4567',
+            'whatsapp_number' => '+94 77 123 4567',
             'images' => [UploadedFile::fake()->create('valid.jpg', 100, 'image/jpeg'), $largeImage],
         ]);
 
-        $response->assertSessionHasErrors('images.1');
+        $response
+            ->assertSessionHasErrors('images.1')
+            ->assertSessionDoesntHaveErrors(['phone_number', 'whatsapp_number']);
     }
 }
