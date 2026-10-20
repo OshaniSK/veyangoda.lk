@@ -16,16 +16,24 @@ class AdminDashboardController extends Controller
     public function index(): View
     {
         $stats = [
-            'total_users'    => User::count(),
-            'total_listings' => Listing::count(),
-            'active_listings'=> Listing::where('status', 'active')->count(),
-            'sold_listings'  => Listing::where('status', 'sold')->count(),
-            'total_categories' => Category::count(),
-            'new_users_today'  => User::whereDate('created_at', today())->count(),
-            'new_listings_today' => Listing::whereDate('created_at', today())->count(),
+            'total_users'       => User::count(),
+            'total_listings'    => Listing::count(),
+            'active_listings'   => Listing::where('status', 'active')->count(),
+            'pending_listings'  => Listing::where('status', 'pending')->count(),
+            'rejected_listings' => Listing::where('status', 'rejected')->count(),
+            'sold_listings'     => Listing::where('status', 'sold')->count(),
+            'total_categories'  => Category::count(),
+            'new_users_today'   => User::whereDate('created_at', today())->count(),
+            'new_listings_today'=> Listing::whereDate('created_at', today())->count(),
         ];
 
-        // Recent activity
+        // Recent pending ads needing review (shown as quick-action tray)
+        $pendingListings = Listing::with(['user', 'category'])
+            ->pending()
+            ->latest()
+            ->take(5)
+            ->get();
+
         $recentListings = Listing::with(['user', 'category'])
             ->latest()
             ->take(5)
@@ -33,6 +41,6 @@ class AdminDashboardController extends Controller
 
         $recentUsers = User::latest()->take(5)->get();
 
-        return view('admin.dashboard', compact('stats', 'recentListings', 'recentUsers'));
+        return view('admin.dashboard', compact('stats', 'pendingListings', 'recentListings', 'recentUsers'));
     }
 }

@@ -37,9 +37,11 @@ class MyListingController extends Controller
 
         // Summary stats
         $stats = [
-            'total'  => $user->listings()->count(),
-            'active' => $user->listings()->where('status', 'active')->count(),
-            'sold'   => $user->listings()->where('status', 'sold')->count(),
+            'total'    => $user->listings()->count(),
+            'active'   => $user->listings()->where('status', 'active')->count(),
+            'pending'  => $user->listings()->where('status', 'pending')->count(),
+            'rejected' => $user->listings()->where('status', 'rejected')->count(),
+            'sold'     => $user->listings()->where('status', 'sold')->count(),
         ];
 
         return view('listings.my-listings', compact('listings', 'groupedListings', 'stats'));
@@ -87,11 +89,24 @@ class MyListingController extends Controller
                 unset($validated['image']);
             }
 
+            // If listing was rejected, editing and saving automatically resubmits it for review
+            if ($listing->status === 'rejected') {
+                $validated['status']           = 'pending';
+                $validated['rejection_reason'] = null;
+                $validated['approved_at']      = null;
+                $validated['approved_by']      = null;
+            }
+
             $listing->update($validated);
         });
 
+
+        $flashMessage = $listing->status === 'pending'
+            ? 'Listing "' . $listing->title . '" updated and resubmitted for admin approval.'
+            : 'Listing "' . $listing->title . '" updated successfully.';
+
         return redirect()->route('my-listings.index')
-            ->with('success', 'Listing "' . $listing->title . '" updated successfully.');
+            ->with('success', $flashMessage);
     }
 
     /**
@@ -125,6 +140,30 @@ class MyListingController extends Controller
 
         return redirect()->route('my-listings.index')
             ->with('success', '"' . $listing->title . '" marked as sold.');
+    }
+
+    /**
+     * Resubmit a rejected listing for re-review.
+     * Status resets to 'pending'; rejection reason is cleared.
+     * Route: PATCH /my-listings/{listing}/resubmit
+     */
+    public function resubmit(Listing $listing): RedirectResponse
+    {
+        $this->authorizeOwner($listing);
+
+        if (! $listing->isRejected()) {
+            return back()->with('error', 'Only rejected ads can be resubmitted.');
+        }
+
+        $listing->update([
+            'status'           => 'pending',
+            'rejection_reason' => null,
+            'approved_at'      => null,
+            'approved_by'      => null,
+        ]);
+
+        return redirect()->route('my-listings.index')
+            ->with('success', '"' . $listing->title . '" has been resubmitted for review.');
     }
 
     // ── Private Helpers ──────────────────────────────────────────────────

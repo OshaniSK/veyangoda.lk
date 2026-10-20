@@ -10,7 +10,7 @@ class CategoryController extends Controller
     {
         $category = Category::where('slug', $slug)
             ->with(['subCategories' => function ($query) {
-                $query->withCount('listings');
+                $query->withCount(['listings' => fn ($q) => $q->where('status', 'active')]);
             }])
             ->firstOrFail();
         

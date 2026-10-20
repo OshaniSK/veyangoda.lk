@@ -55,6 +55,10 @@ class Listing extends Model
         'contact_email',
         'show_phone',
         'show_email',
+        // ── Approval workflow ──────────────────────────────────────────
+        'rejection_reason',
+        'approved_at',
+        'approved_by',
     ];
 
     protected function casts(): array
@@ -64,6 +68,7 @@ class Listing extends Model
             'views_count' => 'integer',
             'show_phone'  => 'boolean',
             'show_email'  => 'boolean',
+            'approved_at' => 'datetime',
         ];
     }
 
@@ -112,9 +117,36 @@ class Listing extends Model
         return $query->where('status', 'active');
     }
 
+    public function scopePending(Builder $query): Builder
+    {
+        return $query->where('status', 'pending');
+    }
+
+    public function scopeRejected(Builder $query): Builder
+    {
+        return $query->where('status', 'rejected');
+    }
+
     public function scopeForUser(Builder $query, int $userId): Builder
     {
         return $query->where('user_id', $userId);
+    }
+
+    // ── Status Helpers ─────────────────────────────────────────────────
+
+    public function isPending(): bool
+    {
+        return $this->status === 'pending';
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->status === 'rejected';
     }
 
     // ── Accessors ──────────────────────────────────────────────────────

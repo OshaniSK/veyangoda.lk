@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminDashboardController;
@@ -48,11 +48,12 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/unfollow/{sellerId}', [App\Http\Controllers\FollowController::class, 'destroy'])->name('follow.destroy');
 
     Route::prefix('my-listings')->name('my-listings.')->group(function () {
-        Route::get('/',              [MyListingController::class, 'index'])->name('index');
-        Route::get('/{listing}/edit',[MyListingController::class, 'edit'])->name('edit');
-        Route::put('/{listing}',     [MyListingController::class, 'update'])->name('update');
-        Route::delete('/{listing}',  [MyListingController::class, 'destroy'])->name('destroy');
-        Route::patch('/{listing}/sold', [MyListingController::class, 'markSold'])->name('sold');
+        Route::get('/',                        [MyListingController::class, 'index'])->name('index');
+        Route::get('/{listing}/edit',          [MyListingController::class, 'edit'])->name('edit');
+        Route::put('/{listing}',               [MyListingController::class, 'update'])->name('update');
+        Route::delete('/{listing}',            [MyListingController::class, 'destroy'])->name('destroy');
+        Route::patch('/{listing}/sold',        [MyListingController::class, 'markSold'])->name('sold');
+        Route::patch('/{listing}/resubmit',    [MyListingController::class, 'resubmit'])->name('resubmit');
     });
 
     // â”€â”€ Messages / Inbox â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -85,6 +86,7 @@ Route::get('/listings/{listing:slug}', [ListingController::class, 'show'])->name
 // â”€â”€ Admin Panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/',                              [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard',                     [AdminDashboardController::class, 'index'])->name('dashboard.page');
 
     // Users
     Route::get('/users',                         [AdminUserController::class, 'index'])->name('users.index');
@@ -97,6 +99,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::patch('/listings/{listing}/approve',  [AdminListingController::class, 'approve'])->name('listings.approve');
     Route::patch('/listings/{listing}/reject',   [AdminListingController::class, 'reject'])->name('listings.reject');
     Route::delete('/listings/{listing}',         [AdminListingController::class, 'destroy'])->name('listings.destroy');
+
+    // Ad Approval Workflow (Pending review queue)
+    Route::get('/ads/pending',                   [\App\Http\Controllers\Admin\AdApprovalController::class, 'index'])->name('ads.pending');
+    Route::patch('/ads/{id}/approve',            [\App\Http\Controllers\Admin\AdApprovalController::class, 'approve'])->name('ads.approve');
+    Route::patch('/ads/{id}/reject',             [\App\Http\Controllers\Admin\AdApprovalController::class, 'reject'])->name('ads.reject');
 
     // Categories
     Route::get('/categories',                    [AdminCategoryController::class, 'index'])->name('categories.index');

@@ -8,6 +8,25 @@
             <h1 class="text-2xl sm:text-3xl font-extrabold text-ink-primary font-serif">Edit Advertisement</h1>
         </div>
 
+        @if($listing->isRejected())
+            <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 sm:p-5">
+                <div class="flex items-start gap-3">
+                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600 mt-0.5">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    </span>
+                    <div>
+                        <h2 class="text-sm font-bold text-red-900">Advertisement Needs Revisions</h2>
+                        <p class="text-xs text-red-700 mt-1 leading-relaxed">
+                            <span class="font-semibold">Reason from Admin:</span> {{ $listing->rejection_reason }}
+                        </p>
+                        <p class="text-[11px] text-red-600 mt-1 font-medium">
+                            Once you make your updates and click <strong>"Save & Resubmit"</strong> below, your ad will be sent back to the review queue.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <div class="card p-6 sm:p-10">
             <form action="{{ route('my-listings.update', $listing) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                 @csrf
@@ -81,7 +100,9 @@
                 {{-- Submit --}}
                 <div class="pt-6 border-t border-slate-100 flex justify-end gap-3">
                     <a href="{{ route('my-listings.index') }}" class="btn-ghost">Cancel</a>
-                    <button type="submit" class="btn-primary">Save Changes</button>
+                    <button type="submit" class="btn-primary">
+                        {{ $listing->isRejected() ? 'Save & Resubmit for Review' : 'Save Changes' }}
+                    </button>
                 </div>
             </form>
         </div>

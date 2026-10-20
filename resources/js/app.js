@@ -110,6 +110,8 @@ Alpine.data('notificationDropdown', () => ({
 
 	getIconClass(type) {
 		switch (type) {
+			case 'ad_approved': return 'bg-emerald-100 text-emerald-600';
+			case 'ad_rejected': return 'bg-rose-100 text-rose-600';
 			case 'message': return 'bg-blue-100 text-[#2563EB]';
 			case 'listing_view': return 'bg-teal-100 text-[#06B6D4]';
 			case 'price_drop': return 'bg-rose-100 text-rose-600';
@@ -118,6 +120,14 @@ Alpine.data('notificationDropdown', () => ({
 	},
 
 	getIconSvg(iconName) {
+		if (iconName === 'check-circle' || iconName === 'approved') {
+			return '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />';
+		}
+
+		if (iconName === 'x-circle' || iconName === 'rejected') {
+			return '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />';
+		}
+
 		if (iconName === 'message') {
 			return '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />';
 		}

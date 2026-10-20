@@ -225,7 +225,7 @@ class ListingController extends Controller
                 'price'           => $validated['price'],
                 'location'        => $validated['location'],
                 'image_path'      => $imagePaths[0],
-                'status'          => 'active',
+                'status'          => 'pending', // Always starts pending — admin must approve
                 // ── Seller contact details ─────────────────────────────
                 'contact_name'    => $validated['contact_name'] ?? null,
                 'phone_number'    => $validated['phone_number'],
@@ -245,8 +245,8 @@ class ListingController extends Controller
             return $listing;
         });
 
-        return redirect()->route('home')
-            ->with('success', 'Your advertisement "' . $listing->title . '" has been published successfully!');
+        return redirect()->route('my-listings.index')
+            ->with('success', '✅ Your advertisement "' . $listing->title . '" has been submitted and is awaiting admin approval. You\'ll be notified once it\'s reviewed.');
     }
 
     /**
@@ -254,12 +254,22 @@ class ListingController extends Controller
      */
     public function show(Listing $listing): View
     {
+        // Non-active ads are hidden from the public; only the owner or an admin may view/preview
+        if (! $listing->isActive()) {
+            $canPreview = auth()->check() && (auth()->id() === $listing->user_id || (bool) auth()->user()->is_admin);
+            if (! $canPreview) {
+                abort(404);
+            }
+        }
+
         $listing->load(['category', 'user.followers', 'photos']);
 
-        // Increment views count
-        $listing->incrementViews();
+        // Increment views count only for live ads
+        if ($listing->isActive()) {
+            $listing->incrementViews();
+        }
 
-        // Get other listings from the same seller
+        // Get other listings from the same seller (active ads only)
         $otherListings = Listing::with(['category', 'photos'])
             ->where('user_id', $listing->user_id)
             ->where('id', '!=', $listing->id)
