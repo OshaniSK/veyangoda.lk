@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Listing;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -12,7 +13,7 @@ class HomeController extends Controller
     /**
      * Display the Ad-First Homepage Feed with active listings and categories.
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
         $query = Listing::query()
             ->with(['category', 'user', 'photos'])
@@ -40,7 +41,7 @@ class HomeController extends Controller
 
         // 3. Location filter
         if ($request->filled('location')) {
-            $query->where('location', 'like', '%' . trim($request->location) . '%');
+            $query->filterByLocation($request->location);
         }
 
         // 4. Price boundary filters
@@ -52,11 +53,19 @@ class HomeController extends Controller
             $query->where('price', '<=', (float) $request->max_price);
         }
         
-        // 5. Poster Type (All / Members)
-        if ($request->filled('poster_type') && $request->poster_type === 'members') {
-            $query->whereHas('user', function ($q) {
-                $q->where('is_verified_seller', true);
-            });
+        $requiresLoginForFollows = false;
+        $isFilteringFollowed = false;
+
+        // 5. Poster Type (All / Members = Followed Sellers)
+        if ($request->query('poster_type') === 'members') {
+            $isFilteringFollowed = true;
+            if (auth()->check()) {
+                $followedUserIds = auth()->user()->followings()->pluck('users.id')->toArray();
+                $query->whereIn('user_id', $followedUserIds);
+            } else {
+                $requiresLoginForFollows = true;
+                $query->whereRaw('1 = 0');
+            }
         }
 
         // 6. Sorting
@@ -94,20 +103,16 @@ class HomeController extends Controller
             ->orderBy('name')
             ->get();
 
-        // Provide the 25 Sri Lankan districts in standard provincial order
-        $locations = collect([
-            'Colombo', 'Gampaha', 'Kalutara', 'Kandy', 'Matale', 'Nuwara Eliya', 
-            'Galle', 'Matara', 'Hambantota', 'Jaffna', 'Mannar', 'Vavuniya', 
-            'Mullaitivu', 'Kilinochchi', 'Batticaloa', 'Ampara', 'Trincomalee', 
-            'Kurunegala', 'Puttalam', 'Anuradhapura', 'Polonnaruwa', 'Badulla', 
-            'Monaragala', 'Rathnapura', 'Kegalle'
-        ]);
+        // Provide the 25 Sri Lankan districts with their local areas
+        $locations = \App\Models\Location::with('areas')->districts()->orderBy('name')->get();
 
         // AJAX request — return only the listings partial as JSON
         if ($request->ajax()) {
-            $html = view('partials.home-listings', compact('listings', 'categories'))->render();
+            $html = view('partials.home-listings', compact('listings', 'categories', 'requiresLoginForFollows', 'isFilteringFollowed'))->render();
             return response()->json([
-                'html' => $html,
+                'html'           => $html,
+                'requires_login' => $requiresLoginForFollows,
+                'total'          => $listings->total(),
                 'pagination' => [
                     'current_page' => $listings->currentPage(),
                     'last_page'    => $listings->lastPage(),
@@ -118,6 +123,6 @@ class HomeController extends Controller
             ]);
         }
 
-        return view('welcome', compact('listings', 'featuredAds', 'categories', 'locations'));
+        return view('welcome', compact('listings', 'featuredAds', 'categories', 'locations', 'requiresLoginForFollows', 'isFilteringFollowed'));
     }
 }

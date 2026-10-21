@@ -220,4 +220,52 @@ class Listing extends Model
     {
         $this->increment('views_count');
     }
+
+    /**
+     * Scope to filter listings by location.
+     * Matches the district and all its sub-areas if a district is specified,
+     * or specifically matches the area.
+     */
+    public function scopeFilterByLocation(Builder $query, ?string $location): Builder
+    {
+        $location = trim((string) $location);
+        if ($location === '' || strcasecmp($location, 'all') === 0 || strcasecmp($location, 'all of sri lanka') === 0) {
+            return $query;
+        }
+
+        $districtName = null;
+        $districtAreas = [];
+        foreach (Location::getHierarchy() as $district => $areas) {
+            if (strcasecmp($district, $location) === 0) {
+                $districtName = $district;
+                $districtAreas = $areas;
+                break;
+            }
+
+            foreach ($areas as $area) {
+                if (strcasecmp($area, $location) === 0) {
+                    $location = $area;
+                    break 2;
+                }
+            }
+        }
+
+        if ($districtName !== null) {
+            $names = array_merge([$districtName], $districtAreas);
+            return $query->where(function (Builder $builder) use ($names) {
+                foreach ($names as $name) {
+                    $builder->orWhere('location', 'like', '%' . $name . '%');
+                }
+            });
+        }
+
+        $cleanName = trim((string) preg_replace('/\s*\(.*?\)\s*/', '', $location));
+
+        return $query->where(function (Builder $builder) use ($location, $cleanName) {
+            $builder->where('location', 'like', '%' . $location . '%');
+            if ($cleanName !== '' && $cleanName !== $location) {
+                $builder->orWhere('location', 'like', '%' . $cleanName . '%');
+            }
+        });
+    }
 }

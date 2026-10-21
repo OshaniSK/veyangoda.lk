@@ -147,7 +147,7 @@ class ExampleTest extends TestCase
             'images' => $images,
         ]);
 
-        $response->assertRedirect('/');
+        $response->assertRedirect('/my-listings');
         $response->assertSessionHas('success');
 
         $this->assertDatabaseHas('listings', [
@@ -158,14 +158,14 @@ class ExampleTest extends TestCase
             'location' => 'Kandy',
             'phone_number' => '0771234567',
             'whatsapp_number' => '+94771234567',
-            'status' => 'active',
+            'status' => 'pending',
         ]);
 
         $listing = Listing::firstWhere('title', 'Handcrafted Terracotta Pot');
         $this->assertNotNull($listing->image_path);
         Storage::disk('public')->assertExists($listing->image_path);
-        $this->assertCount(2, $listing->images);
-        Storage::disk('public')->assertExists($listing->images[1]->image_path);
+        $this->assertCount(2, $listing->photos);
+        Storage::disk('public')->assertExists($listing->photos[1]->photo_path);
     }
 
     public function test_store_listing_fails_validation_if_any_image_exceeds_2mb(): void

@@ -136,8 +136,124 @@ Alpine.data('notificationDropdown', () => ({
 			return '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />';
 		}
 
-		return '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />';
+	},
+}));
+
+Alpine.data('homeFeedFilters', (config = {}) => ({
+	posterType: config.initialPosterType || 'all',
+	sort: config.initialSort || 'latest',
+	category: config.category || '',
+	search: config.search || '',
+	location: config.location || '',
+	loading: false,
+
+	init() {
+		window.addEventListener('popstate', (e) => {
+			const params = new URLSearchParams(window.location.search);
+			this.posterType = params.get('poster_type') || 'all';
+			this.sort = params.get('sort') || 'latest';
+			this.fetchListings(window.location.href, false);
+		});
+
+		this.$root.addEventListener('click', (e) => {
+			const paginationLink = e.target.closest('.ajax-pagination a, nav[aria-label="Pagination Navigation"] a');
+			if (paginationLink && paginationLink.href) {
+				e.preventDefault();
+				this.fetchListings(paginationLink.href, true);
+			}
+		});
+	},
+
+	onPosterTypeChange(type) {
+		this.posterType = type;
+		this.applyFilters();
+	},
+
+	onSortChange(event) {
+		this.sort = event.target.value;
+		this.applyFilters();
+	},
+
+	resetToAllAds() {
+		this.posterType = 'all';
+		this.applyFilters();
+	},
+
+	resetFilters() {
+		this.posterType = 'all';
+		this.sort = 'latest';
+		this.category = '';
+		this.search = '';
+		this.location = '';
+		this.applyFilters();
+	},
+
+	applyFilters() {
+		const url = new URL(window.location.origin + window.location.pathname);
+		const currentParams = new URLSearchParams(window.location.search);
+
+		for (const [key, value] of currentParams.entries()) {
+			if (key !== 'poster_type' && key !== 'sort' && key !== 'page') {
+				url.searchParams.set(key, value);
+			}
+		}
+
+		if (this.category) url.searchParams.set('category', this.category);
+		if (this.search) url.searchParams.set('search', this.search);
+		if (this.location) url.searchParams.set('location', this.location);
+
+		if (this.posterType && this.posterType !== 'all') {
+			url.searchParams.set('poster_type', this.posterType);
+		} else {
+			url.searchParams.delete('poster_type');
+		}
+
+		if (this.sort && this.sort !== 'latest') {
+			url.searchParams.set('sort', this.sort);
+		} else {
+			url.searchParams.delete('sort');
+		}
+
+		this.fetchListings(url.toString(), true);
+	},
+
+	async fetchListings(url, updateHistory = true) {
+		if (this.loading) return;
+		this.loading = true;
+
+		try {
+			const response = await fetch(url, {
+				headers: {
+					'X-Requested-With': 'XMLHttpRequest',
+					'Accept': 'application/json',
+				},
+			});
+
+			if (!response.ok) {
+				throw new Error(`Request failed: ${response.status}`);
+			}
+
+			const data = await response.json();
+			const container = document.getElementById('home-listings-container');
+			if (container && data.html) {
+				container.innerHTML = data.html;
+			}
+
+			if (updateHistory) {
+				window.history.pushState(
+					{ posterType: this.posterType, sort: this.sort },
+					'',
+					url
+				);
+			}
+		} catch (err) {
+			console.error('AJAX feed filtering error:', err);
+			window.location.href = url;
+		} finally {
+			this.loading = false;
+		}
 	},
 }));
 
 Alpine.start();
+

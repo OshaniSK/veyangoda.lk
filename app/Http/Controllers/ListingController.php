@@ -45,7 +45,7 @@ class ListingController extends Controller
         }
 
         if ($request->filled('location')) {
-            $query->where('location', 'like', '%' . trim($request->query('location')) . '%');
+            $query->filterByLocation($request->query('location'));
         }
 
         $sort = $request->query('sort', 'latest');
@@ -60,13 +60,7 @@ class ListingController extends Controller
         $categories = Category::withCount(['listings' => fn ($builder) => $builder->where('status', 'active')])
             ->orderBy('name')
             ->get();
-        $locations = collect([
-            'Colombo', 'Gampaha', 'Kalutara', 'Kandy', 'Matale', 'Nuwara Eliya', 
-            'Galle', 'Matara', 'Hambantota', 'Jaffna', 'Mannar', 'Vavuniya', 
-            'Mullaitivu', 'Kilinochchi', 'Batticaloa', 'Ampara', 'Trincomalee', 
-            'Kurunegala', 'Puttalam', 'Anuradhapura', 'Polonnaruwa', 'Badulla', 
-            'Monaragala', 'Rathnapura', 'Kegalle'
-        ]);
+        $locations = \App\Models\Location::with('areas')->districts()->orderBy('name')->get();
 
         // AJAX — return rendered HTML partial + pagination metadata
         if ($request->ajax()) {
@@ -149,8 +143,10 @@ class ListingController extends Controller
                     $query->where('year_min', '>=', $value);
                 } elseif ($requestKey === 'year_max') {
                     $query->where('year_max', '<=', $value);
-                } elseif (in_array($requestKey, ['model', 'location'])) {
-                    $query->where($requestKey, 'like', '%' . $value . '%');
+                } elseif ($requestKey === 'location') {
+                    $query->filterByLocation($value);
+                } elseif ($requestKey === 'model') {
+                    $query->where('model', 'like', '%' . $value . '%');
                 } else {
                     // Directly match column if it exists in fillables
                     // All new columns: item_type, dietary, shelf_life, cuisine, meal_type, flavor, curry_type, rice_type, spice_level, temperature, size, event_type, service_type, occasion

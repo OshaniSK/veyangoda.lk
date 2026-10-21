@@ -22,8 +22,10 @@ return new class extends Migration
             // We use DB::statement for precision control.
         });
 
-        // Safely expand the ENUM without losing existing data
-        DB::statement("ALTER TABLE listings MODIFY COLUMN status ENUM('pending','active','rejected','sold') NOT NULL DEFAULT 'pending'");
+        // Safely expand the ENUM without losing existing data (MySQL only)
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE listings MODIFY COLUMN status ENUM('pending','active','rejected','sold') NOT NULL DEFAULT 'pending'");
+        }
 
         Schema::table('listings', function (Blueprint $table) {
             // Why nullable: rejection_reason only applies to rejected listings

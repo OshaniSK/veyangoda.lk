@@ -39,14 +39,15 @@
                         <input id="browse-search" type="search" name="search" value="{{ $search }}" placeholder="Search listings" class="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-500 focus:border-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-700/20">
                     </div>
 
-                    <div>
-                        <label for="browse-location" class="mb-1.5 block text-xs font-bold text-slate-600">Location</label>
-                        <select id="browse-location" name="location" class="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:border-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-700/20">
-                            <option value="">All locations</option>
-                            @foreach($locations as $location)
-                                <option value="{{ $location }}" @selected(request('location') === $location)>{{ $location }}</option>
-                            @endforeach
-                        </select>
+                    <div class="relative overflow-visible">
+                        <label class="mb-1.5 block text-xs font-bold text-slate-600">Location</label>
+                        <x-location-picker
+                            id="browse-location"
+                            :locations="$locations"
+                            :value="request('location')"
+                            placeholder="All locations"
+                            trigger-class="rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:border-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-700/20"
+                        />
                     </div>
 
                     <div>

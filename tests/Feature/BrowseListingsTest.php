@@ -55,6 +55,21 @@ class BrowseListingsTest extends TestCase
         );
     }
 
+    public function test_district_search_includes_local_areas_without_preseeded_location_rows(): void
+    {
+        $seller = User::factory()->create();
+        $category = Category::create(['name' => 'Home Decor', 'slug' => 'home-decor']);
+        $areaListing = $this->createListing($seller, $category, 'Veyangoda Candle', 'Veyangoda', 1800);
+        $districtListing = $this->createListing($seller, $category, 'Gampaha Candle', 'Gampaha', 2000);
+        $otherListing = $this->createListing($seller, $category, 'Kandy Candle', 'Kandy', 1500);
+
+        $this->get(route('listings.index', ['location' => 'Gampaha']))
+            ->assertOk()
+            ->assertSee($areaListing->title)
+            ->assertSee($districtListing->title)
+            ->assertDontSee($otherListing->title);
+    }
+
     public function test_home_category_card_links_to_slug_filtered_browse_route(): void
     {
         $seller = User::factory()->create();

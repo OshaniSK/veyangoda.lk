@@ -19,15 +19,13 @@
                     <input type="text" name="search" placeholder="What are you looking for?" value="{{ request('search') }}" class="w-full rounded-lg border-0 py-3.5 pl-12 pr-4 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-emerald-500">
                 </div>
 
-                <div class="relative min-w-[180px] overflow-visible lg:w-60 lg:border-l lg:border-gray-200 lg:pl-3">
-                    <svg aria-hidden="true" class="pointer-events-none absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-slate-400 lg:left-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657 13.414 20.9a2 2 0 0 1-2.828 0l-4.243-4.243a8 8 0 1 1 11.314 0ZM15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
-                    <select name="location" aria-label="Select District or City" class="w-full appearance-none rounded-lg border-0 bg-white py-3.5 pl-12 pr-10 text-slate-700 focus:ring-2 focus:ring-emerald-500 lg:pl-12 lg:pr-9">
-                        <option value="">Select District/City</option>
-                        @foreach($locations as $location)
-                            <option value="{{ $location }}" @selected(request('location') === $location)>{{ $location }}</option>
-                        @endforeach
-                    </select>
-                    <svg aria-hidden="true" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
+                <div class="relative min-w-[200px] overflow-visible lg:w-64 lg:border-l lg:border-gray-200 lg:pl-3">
+                    <x-location-picker
+                        :locations="$locations"
+                        :value="request('location')"
+                        placeholder="Select Location"
+                        trigger-class="rounded-lg bg-white py-3.5 px-3 text-slate-700 hover:bg-slate-50 focus:ring-2 focus:ring-emerald-500"
+                    />
                 </div>
 
                 <div class="relative min-w-[180px] overflow-visible lg:w-56 lg:border-l lg:border-gray-200 lg:pl-3">

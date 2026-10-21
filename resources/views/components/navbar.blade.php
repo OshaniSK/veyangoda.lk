@@ -10,23 +10,76 @@
 
             <div class="hidden items-center gap-4 lg:flex">
                 @unless(request()->routeIs('my-listings.*'))
-                    <div x-data="{ open: false }" class="relative">
+                    <div x-data="{ open: false, activeDistrict: null }" @click.outside="open = false" @keydown.escape.window="open = false" class="relative">
                         <button
                             type="button"
                             @click="open = !open"
-                            @keydown.escape.window="open = false"
                             :aria-expanded="open.toString()"
                             class="inline-flex items-center gap-2 rounded-lg border border-white/25 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                         >
                             <svg aria-hidden="true" class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657 13.414 20.9a2 2 0 0 1-2.828 0l-4.243-4.243a8 8 0 1 1 11.314 0ZM15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
-                            <span>All of Sri Lanka</span>
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
+                            <span>{{ request('location') ?: 'All of Sri Lanka' }}</span>
+                            <svg aria-hidden="true" class="h-4 w-4 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
                         </button>
-                        <div x-cloak x-show="open" @click.outside="open = false" class="absolute right-0 z-50 mt-2 w-52 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 text-slate-800 shadow-xl">
-                            <a href="{{ route('listings.index') }}" class="block px-4 py-2.5 text-sm transition-colors hover:bg-emerald-50">All of Sri Lanka</a>
-                            @foreach(['Veyangoda', 'Colombo', 'Gampaha', 'Kandy', 'Kurunegala', 'Matale'] as $place)
-                                <a href="{{ route('listings.index', ['location' => $place]) }}" class="block px-4 py-2.5 text-sm transition-colors hover:bg-emerald-50">{{ $place }}</a>
-                            @endforeach
+                        <div x-cloak x-show="open" class="absolute right-0 z-50 mt-2 w-[540px] md:w-[600px] overflow-hidden rounded-xl border border-slate-200 bg-white text-slate-800 shadow-2xl ring-1 ring-black/5">
+                            @php
+                                $navbarLocations = \App\Models\Location::getHierarchy();
+                            @endphp
+                            <!-- Navbar Location Header -->
+                            <div class="flex items-center justify-between border-b border-slate-100 px-4 py-2.5 bg-slate-50/70">
+                                <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Choose District & Area</span>
+                                <a href="{{ route('listings.index') }}" class="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline">
+                                    All of Sri Lanka
+                                </a>
+                            </div>
+                            <!-- Two Column Master-Detail -->
+                            <div class="grid grid-cols-2 divide-x divide-slate-200">
+                                <!-- Districts (A-Z) -->
+                                <div class="max-h-[320px] overflow-y-auto space-y-0.5 p-2 custom-scrollbar bg-slate-50/40">
+                                    <div class="px-2 pb-1 text-[11px] font-bold uppercase tracking-wider text-slate-500">Districts (A-Z)</div>
+                                    @foreach($navbarLocations as $dist => $areas)
+                                        <button
+                                            type="button"
+                                            @mouseenter="activeDistrict = '{{ $dist }}'"
+                                            @click="activeDistrict = '{{ $dist }}'"
+                                            :class="activeDistrict === '{{ $dist }}' ? 'bg-emerald-600 text-white font-semibold' : 'text-slate-700 hover:bg-slate-100 font-medium'"
+                                            class="group flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-left text-sm transition"
+                                        >
+                                            <span>{{ $dist }}</span>
+                                            <span class="text-xs transition-transform" :class="activeDistrict === '{{ $dist }}' ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'">▶</span>
+                                        </button>
+                                    @endforeach
+                                </div>
+                                <!-- Local Areas -->
+                                <div class="bg-white">
+                                    <div x-show="!activeDistrict" class="flex h-[320px] flex-col items-center justify-center p-4 text-center text-slate-400">
+                                        <p class="text-xs text-slate-500">Hover or click a district to view its local areas</p>
+                                    </div>
+                                    @foreach($navbarLocations as $dist => $areas)
+                                        <div x-show="activeDistrict === '{{ $dist }}'" x-cloak class="flex flex-col h-full">
+                                            <div class="px-3 pt-2 pb-1 text-[11px] font-bold uppercase tracking-wider text-slate-500 truncate">
+                                                Areas in {{ $dist }}
+                                            </div>
+                                            <div class="max-h-[280px] overflow-y-auto space-y-0.5 p-2 custom-scrollbar flex-1">
+                                                <a
+                                                    href="{{ route('listings.index', ['location' => $dist]) }}"
+                                                    class="block w-full rounded-lg px-3 py-1.5 text-left text-sm font-bold text-emerald-700 hover:bg-emerald-50 bg-emerald-50/50 mb-1"
+                                                >
+                                                    All of {{ $dist }}
+                                                </a>
+                                                @foreach($areas as $area)
+                                                    <a
+                                                        href="{{ route('listings.index', ['location' => $area]) }}"
+                                                        class="block rounded-lg px-3 py-1 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                                                    >
+                                                        {{ $area }}
+                                                    </a>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -121,10 +174,25 @@
                         <span class="flex-1">All of Sri Lanka</span>
                         <svg aria-hidden="true" class="h-4 w-4 transition-transform" :class="locationOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
                     </button>
-                    <div x-cloak x-show="locationOpen" class="ml-8 space-y-1 py-1">
-                        <a href="{{ route('listings.index') }}" class="block rounded-lg px-3 py-2 text-sm text-white/90 transition-colors hover:bg-white/10">All of Sri Lanka</a>
-                        @foreach(['Veyangoda', 'Colombo', 'Gampaha', 'Kandy', 'Kurunegala', 'Matale'] as $place)
-                            <a href="{{ route('listings.index', ['location' => $place]) }}" class="block rounded-lg px-3 py-2 text-sm text-white/90 transition-colors hover:bg-white/10">{{ $place }}</a>
+                    <div x-cloak x-show="locationOpen" class="ml-4 space-y-1 py-1 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+                        <a href="{{ route('listings.index') }}" class="block rounded-lg px-3 py-2 text-sm font-bold text-white transition-colors hover:bg-white/10">All of Sri Lanka</a>
+                        @foreach(\App\Models\Location::getHierarchy() as $dist => $areas)
+                            <div x-data="{ distOpen: false }" class="border-t border-white/10 pt-1">
+                                <button type="button" @click="distOpen = !distOpen" class="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-sm font-semibold text-white/90 hover:bg-white/10">
+                                    <span>{{ $dist }}</span>
+                                    <span class="text-xs transition-transform" :class="distOpen ? 'rotate-90' : ''">▶</span>
+                                </button>
+                                <div x-show="distOpen" class="ml-4 space-y-0.5 py-1">
+                                    <a href="{{ route('listings.index', ['location' => $dist]) }}" class="block rounded px-2.5 py-1 text-xs font-bold text-emerald-300 hover:bg-white/10">
+                                        All of {{ $dist }}
+                                    </a>
+                                    @foreach($areas as $area)
+                                        <a href="{{ route('listings.index', ['location' => $area]) }}" class="block rounded px-2.5 py-1 text-xs text-white/80 hover:bg-white/10">
+                                            {{ $area }}
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
                         @endforeach
                     </div>
                 </div>
