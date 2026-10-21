@@ -9,8 +9,10 @@
             Followed Members
         @elseif(!empty($isFilteringFollowed))
             Ads from Followed Sellers
+        @elseif(request('sub_category'))
+            Ads in {{ ucwords(str_replace('-', ' ', request('sub_category'))) }}
         @elseif(request('category'))
-            Ads in {{ $categories->firstWhere('slug', request('category'))?->name ?? 'Category' }}
+            Ads in {{ $categories->firstWhere('slug', request('category'))?->name ?? ucwords(str_replace('-', ' ', request('category'))) }}
         @elseif(request('search'))
             Search results for "{{ request('search') }}"
         @else

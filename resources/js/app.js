@@ -143,6 +143,7 @@ Alpine.data('homeFeedFilters', (config = {}) => ({
 	posterType: config.initialPosterType || 'all',
 	sort: config.initialSort || 'latest',
 	category: config.category || '',
+	subCategory: config.subCategory || '',
 	search: config.search || '',
 	location: config.location || '',
 	loading: false,
@@ -152,7 +153,32 @@ Alpine.data('homeFeedFilters', (config = {}) => ({
 			const params = new URLSearchParams(window.location.search);
 			this.posterType = params.get('poster_type') || 'all';
 			this.sort = params.get('sort') || 'latest';
+			this.location = params.get('location') || '';
+			this.search = params.get('search') || '';
+			this.category = params.get('category') || '';
+			this.subCategory = params.get('sub_category') || '';
 			this.fetchListings(window.location.href, false);
+		});
+
+		window.addEventListener('location-selected', (e) => {
+			const loc = (e.detail && typeof e.detail === 'object' && 'location' in e.detail) 
+				? e.detail.location 
+				: (e.detail || '');
+			this.location = loc;
+			this.applyFilters();
+		});
+
+		window.addEventListener('category-selected', (e) => {
+			const detail = e.detail || {};
+			this.category = detail.category || '';
+			this.subCategory = detail.subCategory || '';
+			this.applyFilters();
+		});
+
+		window.addEventListener('keyword-search', (e) => {
+			const detail = e.detail || {};
+			this.search = (typeof detail.search !== 'undefined') ? detail.search : (detail || '');
+			this.applyFilters();
 		});
 
 		this.$root.addEventListener('click', (e) => {
@@ -183,9 +209,13 @@ Alpine.data('homeFeedFilters', (config = {}) => ({
 		this.posterType = 'all';
 		this.sort = 'latest';
 		this.category = '';
+		this.subCategory = '';
 		this.search = '';
 		this.location = '';
 		this.applyFilters();
+		window.dispatchEvent(new CustomEvent('location-selected', { detail: { location: '' } }));
+		window.dispatchEvent(new CustomEvent('category-selected', { detail: { category: '', subCategory: '' } }));
+		window.dispatchEvent(new CustomEvent('keyword-search', { detail: { search: '' } }));
 	},
 
 	applyFilters() {
@@ -193,12 +223,13 @@ Alpine.data('homeFeedFilters', (config = {}) => ({
 		const currentParams = new URLSearchParams(window.location.search);
 
 		for (const [key, value] of currentParams.entries()) {
-			if (key !== 'poster_type' && key !== 'sort' && key !== 'page') {
+			if (!['poster_type', 'sort', 'page', 'category', 'sub_category', 'search', 'location'].includes(key)) {
 				url.searchParams.set(key, value);
 			}
 		}
 
 		if (this.category) url.searchParams.set('category', this.category);
+		if (this.subCategory) url.searchParams.set('sub_category', this.subCategory);
 		if (this.search) url.searchParams.set('search', this.search);
 		if (this.location) url.searchParams.set('location', this.location);
 

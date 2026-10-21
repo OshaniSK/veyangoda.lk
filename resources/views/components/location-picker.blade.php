@@ -68,6 +68,17 @@
         activeDistrict: @js($initialActiveDistrict),
         autoSubmit: @js($autoSubmit),
 
+        init() {
+            window.addEventListener('location-selected', (e) => {
+                const loc = (e.detail && typeof e.detail === 'object' && 'location' in e.detail) ? e.detail.location : (e.detail || '');
+                if (this.selectedLocation !== loc) {
+                    this.selectedLocation = loc;
+                    const el = this.$refs.hiddenInput;
+                    if (el) el.value = loc;
+                }
+            });
+        },
+
         togglePicker() {
             this.open = !this.open;
         },
@@ -87,6 +98,7 @@
                     el.dispatchEvent(new Event('change', { bubbles: true }));
                 }
                 this.$dispatch('location-selected', { location: this.selectedLocation });
+                window.dispatchEvent(new CustomEvent('location-selected', { detail: { location: this.selectedLocation } }));
                 if (this.autoSubmit) {
                     const form = this.$el.closest('form');
                     if (form) {
@@ -179,7 +191,7 @@
         x-transition:leave="transition ease-in duration-100"
         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
         x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
-        class="absolute left-0 top-full z-50 mt-2 w-full sm:w-[560px] md:w-[620px] max-w-[calc(100vw-2rem)] rounded-xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/15 ring-1 ring-black/5 overflow-hidden"
+        class="absolute left-0 top-full z-[100] mt-2 w-full sm:w-[560px] md:w-[620px] max-w-[calc(100vw-2rem)] rounded-xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20 ring-1 ring-black/10 overflow-hidden"
     >
         <!-- Panel Header -->
         <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 bg-slate-50/70">

@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(LocationSeeder::class);
+        $this->call(CategoryAndSubCategorySeeder::class);
 
         // 1. Seed Seller / Users with phone_number
         $seller1 = User::firstOrCreate(

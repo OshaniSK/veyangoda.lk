@@ -28,15 +28,27 @@ class HomeController extends Controller
             });
         }
 
-        // 2. Category filter
+        // 2. Category & Subcategory filter
         if ($request->filled('category')) {
             $query->whereHas('category', function ($q) use ($request) {
-                $q->where('slug', $request->category);
+                $q->where('slug', $request->category)
+                  ->orWhere('name', $request->category);
             });
         }
         
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
+        }
+
+        if ($request->filled('sub_category')) {
+            $query->whereHas('subCategory', function ($q) use ($request) {
+                $q->where('slug', $request->sub_category)
+                  ->orWhere('name', $request->sub_category);
+            });
+        }
+
+        if ($request->filled('sub_category_id')) {
+            $query->where('sub_category_id', $request->sub_category_id);
         }
 
         // 3. Location filter
@@ -99,7 +111,9 @@ class HomeController extends Controller
 
         // Fetch categories with active listings count for sidebar
         $categories = Category::withCount(['listings' => fn ($q) => $q->where('status', 'active')])
-            ->with('subCategories')
+            ->with(['subCategories' => function ($query) {
+                $query->withCount(['listings' => fn ($q) => $q->where('status', 'active')]);
+            }])
             ->orderBy('name')
             ->get();
 

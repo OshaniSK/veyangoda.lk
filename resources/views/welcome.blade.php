@@ -6,6 +6,7 @@
             initialPosterType: @js(request('poster_type', 'all')),
             initialSort: @js(request('sort', 'latest')),
             category: @js(request('category', '')),
+            subCategory: @js(request('sub_category', '')),
             search: @js(request('search', '')),
             location: @js(request('location', ''))
         })"
@@ -79,7 +80,29 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
+        <!-- Active Filters Indicator -->
+        <div x-show="location || search || category || subCategory" x-cloak class="mb-4 flex flex-wrap items-center gap-2">
+            <span class="text-xs font-semibold text-slate-500">Active filters:</span>
+            <span x-show="location" class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-900 border border-emerald-200">
+                <span x-text="'📍 ' + location"></span>
+                <button type="button" @click="location = ''; applyFilters(); window.dispatchEvent(new CustomEvent('location-selected', { detail: { location: '' } }));" class="hover:text-emerald-700 ml-1 font-bold text-slate-400 hover:text-slate-700 cursor-pointer">×</button>
+            </span>
+            <span x-show="search" class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-900 border border-emerald-200">
+                <span x-text="'🔍 ' + search"></span>
+                <button type="button" @click="search = ''; applyFilters(); window.dispatchEvent(new CustomEvent('keyword-search', { detail: { search: '' } }));" class="hover:text-emerald-700 ml-1 font-bold text-slate-400 hover:text-slate-700 cursor-pointer">×</button>
+            </span>
+            <span x-show="category" class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-900 border border-emerald-200">
+                <span x-text="'📁 ' + category"></span>
+                <button type="button" @click="category = ''; subCategory = ''; applyFilters(); window.dispatchEvent(new CustomEvent('category-selected', { detail: { category: '', subCategory: '' } }));" class="hover:text-emerald-700 ml-1 font-bold text-slate-400 hover:text-slate-700 cursor-pointer">×</button>
+            </span>
+            <span x-show="subCategory" class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-950 border border-emerald-300">
+                <span x-text="'📂 ' + subCategory"></span>
+                <button type="button" @click="subCategory = ''; applyFilters(); window.dispatchEvent(new CustomEvent('category-selected', { detail: { category: category, subCategory: '' } }));" class="hover:text-emerald-700 ml-1 font-bold text-slate-400 hover:text-slate-700 cursor-pointer">×</button>
+            </span>
+            <button type="button" @click="resetFilters()" class="text-xs text-slate-500 hover:text-slate-800 underline ml-2 cursor-pointer">Reset all</button>
+        </div>
+
+        <div class="mx-auto grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
             <!-- Left Sidebar -->
             <aside class="hidden lg:block">
                 <div class="sticky top-24">
@@ -104,8 +127,8 @@
             <!-- Main Content -->
             <main>
                 <!-- Featured Ads Section -->
-                @if(!request()->has('category') && !request()->has('search'))
-                    <div x-show="posterType === 'all' && !category && !search" x-transition.opacity>
+                @if(!request()->has('category') && !request()->has('sub_category') && !request()->has('search') && !request()->has('location'))
+                    <div x-show="posterType === 'all' && !category && !subCategory && !search && !location" x-transition.opacity>
                         <x-featured-ads :ads="$featuredAds" />
                     </div>
                 @endif
@@ -119,6 +142,7 @@
                     @include('partials.home-listings')
                 </section>
             </main>
+
         </div>
 
         {{-- Start Selling CTA Section (Moved to the bottom of the homepage, just above the footer) --}}
@@ -137,6 +161,7 @@
                             posterType: config.initialPosterType || 'all',
                             sort: config.initialSort || 'latest',
                             category: config.category || '',
+                            subCategory: config.subCategory || '',
                             search: config.search || '',
                             location: config.location || '',
                             loading: false,
@@ -146,8 +171,53 @@
                                     const params = new URLSearchParams(window.location.search);
                                     this.posterType = params.get('poster_type') || 'all';
                                     this.sort = params.get('sort') || 'latest';
+                                    this.location = params.get('location') || '';
+                                    this.search = params.get('search') || '';
+                                    this.category = params.get('category') || '';
+                                    this.subCategory = params.get('sub_category') || '';
                                     this.fetchListings(window.location.href, false);
                                 });
+
+                                // Listen for location selection from hero section or navbar
+                                window.addEventListener('location-selected', (e) => {
+                                    const loc = (e.detail && typeof e.detail === 'object' && 'location' in e.detail) 
+                                        ? e.detail.location 
+                                        : (e.detail || '');
+                                    this.location = loc;
+                                    this.applyFilters();
+                                });
+
+                                // Listen for category / subcategory selection from sidebar
+                                window.addEventListener('category-selected', (e) => {
+                                    const detail = e.detail || {};
+                                    this.category = detail.category || '';
+                                    this.subCategory = detail.subCategory || '';
+                                    this.applyFilters();
+                                });
+
+                                // Listen for keyword search from sidebar
+                                window.addEventListener('keyword-search', (e) => {
+                                    const detail = e.detail || {};
+                                    this.search = (typeof detail.search !== 'undefined') ? detail.search : (detail || '');
+                                    this.applyFilters();
+                                });
+
+                                // Intercept hero search form submission on homepage to filter ads in place
+                                const heroSearchForm = document.querySelector('section form[action*="listings"]');
+                                if (heroSearchForm) {
+                                    heroSearchForm.addEventListener('submit', (e) => {
+                                        e.preventDefault();
+                                        const formData = new FormData(heroSearchForm);
+                                        this.search = (formData.get('search') || '').trim();
+                                        this.location = (formData.get('location') || '').trim();
+                                        this.category = (formData.get('category') || '').trim();
+                                        this.applyFilters();
+                                        const listingsContainer = document.getElementById('home-listings-container');
+                                        if (listingsContainer) {
+                                            listingsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                        }
+                                    });
+                                }
 
                                 this.$root.addEventListener('click', (e) => {
                                     const paginationLink = e.target.closest('.ajax-pagination a, nav[aria-label="Pagination Navigation"] a');
@@ -177,9 +247,13 @@
                                 this.posterType = 'all';
                                 this.sort = 'latest';
                                 this.category = '';
+                                this.subCategory = '';
                                 this.search = '';
                                 this.location = '';
                                 this.applyFilters();
+                                window.dispatchEvent(new CustomEvent('location-selected', { detail: { location: '' } }));
+                                window.dispatchEvent(new CustomEvent('category-selected', { detail: { category: '', subCategory: '' } }));
+                                window.dispatchEvent(new CustomEvent('keyword-search', { detail: { search: '' } }));
                             },
 
                             applyFilters() {
@@ -187,14 +261,34 @@
                                 const currentParams = new URLSearchParams(window.location.search);
 
                                 for (const [key, value] of currentParams.entries()) {
-                                    if (key !== 'poster_type' && key !== 'sort' && key !== 'page') {
+                                    if (!['poster_type', 'sort', 'page', 'category', 'sub_category', 'search', 'location'].includes(key)) {
                                         url.searchParams.set(key, value);
                                     }
                                 }
 
-                                if (this.category) url.searchParams.set('category', this.category);
-                                if (this.search) url.searchParams.set('search', this.search);
-                                if (this.location) url.searchParams.set('location', this.location);
+                                if (this.category) {
+                                    url.searchParams.set('category', this.category);
+                                } else {
+                                    url.searchParams.delete('category');
+                                }
+
+                                if (this.subCategory) {
+                                    url.searchParams.set('sub_category', this.subCategory);
+                                } else {
+                                    url.searchParams.delete('sub_category');
+                                }
+
+                                if (this.search) {
+                                    url.searchParams.set('search', this.search);
+                                } else {
+                                    url.searchParams.delete('search');
+                                }
+
+                                if (this.location) {
+                                    url.searchParams.set('location', this.location);
+                                } else {
+                                    url.searchParams.delete('location');
+                                }
 
                                 if (this.posterType && this.posterType !== 'all') {
                                     url.searchParams.set('poster_type', this.posterType);
